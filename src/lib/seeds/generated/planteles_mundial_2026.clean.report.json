@@ -1,0 +1,184 @@
+{
+  "totalInputRows": 1254,
+  "mergedRows": [
+    {
+      "country": "Jordania",
+      "listedPosition": "DEFENSORES",
+      "from": [
+        "Mohammad Abualnadi (Selangor FC",
+        "Malasia)"
+      ],
+      "to": "Mohammad Abualnadi (Selangor FC, Malasia)"
+    },
+    {
+      "country": "Jordania",
+      "listedPosition": "DEFENSORES",
+      "from": [
+        "Mohannad Abu Taha (Al-Orobah FC",
+        "Arabia Saudita)"
+      ],
+      "to": "Mohannad Abu Taha (Al-Orobah FC, Arabia Saudita)"
+    },
+    {
+      "country": "Jordania",
+      "listedPosition": "DEFENSORES",
+      "from": [
+        "Yazan Al Arab (FC Seoul",
+        "Corea del Sur)"
+      ],
+      "to": "Yazan Al Arab (FC Seoul, Corea del Sur)"
+    },
+    {
+      "country": "Jordania",
+      "listedPosition": "VOLANTES",
+      "from": [
+        "Noor Al Rawabdeh (Selangor FC",
+        "Malasia)"
+      ],
+      "to": "Noor Al Rawabdeh (Selangor FC, Malasia)"
+    },
+    {
+      "country": "Jordania",
+      "listedPosition": "VOLANTES",
+      "from": [
+        "Yousef Qashi e Ibrahim Sadeh (Al-Karma",
+        "Iraq)"
+      ],
+      "to": "Yousef Qashi e Ibrahim Sadeh (Al-Karma, Iraq)"
+    },
+    {
+      "country": "Jordania",
+      "listedPosition": "DELANTEROS",
+      "from": [
+        "Mohammad Abu Zraiq (Raja Casablanca",
+        "Marruecos)"
+      ],
+      "to": "Mohammad Abu Zraiq (Raja Casablanca, Marruecos)"
+    },
+    {
+      "country": "Jordania",
+      "listedPosition": "DELANTEROS",
+      "from": [
+        "Mousa Al Tamari (Stade de Rennes",
+        "Francia)"
+      ],
+      "to": "Mousa Al Tamari (Stade de Rennes, Francia)"
+    },
+    {
+      "country": "Jordania",
+      "listedPosition": "DELANTEROS",
+      "from": [
+        "Ali Azaizeh (Al-Shabab",
+        "Arabia Saudita)"
+      ],
+      "to": "Ali Azaizeh (Al-Shabab, Arabia Saudita)"
+    },
+    {
+      "country": "Jordania",
+      "listedPosition": "DELANTEROS",
+      "from": [
+        "Ali Olwan e Ibrahim Sabra (NK Lokomotiva",
+        "Croacia)"
+      ],
+      "to": "Ali Olwan e Ibrahim Sabra (NK Lokomotiva, Croacia)"
+    }
+  ],
+  "strippedAnnotations": [
+    {
+      "country": "Jordania",
+      "from": "Mohammad Abualnadi (Selangor FC, Malasia)",
+      "to": "Mohammad Abualnadi"
+    },
+    {
+      "country": "Jordania",
+      "from": "Mohannad Abu Taha (Al-Orobah FC, Arabia Saudita)",
+      "to": "Mohannad Abu Taha"
+    },
+    {
+      "country": "Jordania",
+      "from": "Yazan Al Arab (FC Seoul, Corea del Sur)",
+      "to": "Yazan Al Arab"
+    },
+    {
+      "country": "Jordania",
+      "from": "Noor Al Rawabdeh (Selangor FC, Malasia)",
+      "to": "Noor Al Rawabdeh"
+    },
+    {
+      "country": "Jordania",
+      "from": "Yousef Qashi e Ibrahim Sadeh (Al-Karma, Iraq)",
+      "to": "Yousef Qashi e Ibrahim Sadeh"
+    },
+    {
+      "country": "Jordania",
+      "from": "Mohammad Abu Zraiq (Raja Casablanca, Marruecos)",
+      "to": "Mohammad Abu Zraiq"
+    },
+    {
+      "country": "Jordania",
+      "from": "Mousa Al Tamari (Stade de Rennes, Francia)",
+      "to": "Mousa Al Tamari"
+    },
+    {
+      "country": "Jordania",
+      "from": "Ali Azaizeh (Al-Shabab, Arabia Saudita)",
+      "to": "Ali Azaizeh"
+    },
+    {
+      "country": "Jordania",
+      "from": "Ali Olwan e Ibrahim Sabra (NK Lokomotiva, Croacia)",
+      "to": "Ali Olwan e Ibrahim Sabra"
+    }
+  ],
+  "splitPlayers": [
+    {
+      "country": "Brasil",
+      "from": "Rayan e Igor Thiago",
+      "to": [
+        "Rayan",
+        "Igor Thiago"
+      ]
+    },
+    {
+      "country": "Ecuador",
+      "from": "Kevin Rodríguez Jordy Caicedo",
+      "to": [
+        "Kevin Rodriguez",
+        "Jordy Caicedo"
+      ]
+    },
+    {
+      "country": "Jordania",
+      "from": "Yousef Qashi e Ibrahim Sadeh",
+      "to": [
+        "Yousef Qashi",
+        "Ibrahim Sadeh"
+      ]
+    },
+    {
+      "country": "Jordania",
+      "from": "Ali Olwan e Ibrahim Sabra",
+      "to": [
+        "Ali Olwan",
+        "Ibrahim Sabra"
+      ]
+    },
+    {
+      "country": "Croacia",
+      "from": "Dominik Kotarski e Ivor Pandur",
+      "to": [
+        "Dominik Kotarski",
+        "Ivor Pandur"
+      ]
+    }
+  ],
+  "normalizedPositions": {
+    "ARQUEROS": "ARQUEROS",
+    "DEFENSORES": "DEFENSORES",
+    "VOLANTES": "MEDIOCAMPISTAS",
+    "DELANTEROS": "DELANTEROS",
+    "MEDIOCAMPISTAS": "MEDIOCAMPISTAS"
+  },
+  "duplicatesRemoved": 0,
+  "totalOutputRows": 1250
+}

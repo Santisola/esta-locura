@@ -1,0 +1,160 @@
+{
+  "totalPlayers": 1250,
+  "matchedPlayers": 1176,
+  "unmatchedPlayers": 74,
+  "playersWithBirthDate": 1175,
+  "playersWithClub": 981,
+  "playersWithHeight": 1086,
+  "unmatchedSample": [
+    {
+      "country": "México",
+      "name": "Guillermo Martínez",
+      "listedPositionGroup": "DELANTEROS",
+      "slug": "guillermo-martinez"
+    },
+    {
+      "country": "Corea Del Sur",
+      "name": "Lee Gi-hyuk",
+      "listedPositionGroup": "DEFENSORES",
+      "slug": "lee-gi-hyuk"
+    },
+    {
+      "country": "Canadá",
+      "name": "Ali Ahmed",
+      "listedPositionGroup": "MEDIOCAMPISTAS",
+      "slug": "ali-ahmed"
+    },
+    {
+      "country": "Canadá",
+      "name": "Promise David",
+      "listedPositionGroup": "DELANTEROS",
+      "slug": "promise-david"
+    },
+    {
+      "country": "Qatar",
+      "name": "Meshaal Barsham",
+      "listedPositionGroup": "ARQUEROS",
+      "slug": "meshaal-barsham"
+    },
+    {
+      "country": "Qatar",
+      "name": "Ayoub Al Alawi",
+      "listedPositionGroup": "DEFENSORES",
+      "slug": "ayoub-al-alawi"
+    },
+    {
+      "country": "Qatar",
+      "name": "Homam El-Amin",
+      "listedPositionGroup": "DEFENSORES",
+      "slug": "homam-el-amin"
+    },
+    {
+      "country": "Qatar",
+      "name": "Hamdy Fathy",
+      "listedPositionGroup": "MEDIOCAMPISTAS",
+      "slug": "hamdy-fathy"
+    },
+    {
+      "country": "Qatar",
+      "name": "Mohamed Naceur Al-Mannai",
+      "listedPositionGroup": "MEDIOCAMPISTAS",
+      "slug": "mohamed-naceur-al-mannai"
+    },
+    {
+      "country": "Brasil",
+      "name": "Bremer",
+      "listedPositionGroup": "DEFENSORES",
+      "slug": "bremer"
+    },
+    {
+      "country": "Brasil",
+      "name": "Danilo Santos",
+      "listedPositionGroup": "MEDIOCAMPISTAS",
+      "slug": "danilo-santos"
+    },
+    {
+      "country": "Marruecos",
+      "name": "Ajmed Reda Tagnaouti",
+      "listedPositionGroup": "ARQUEROS",
+      "slug": "ajmed-reda-tagnaouti"
+    },
+    {
+      "country": "Marruecos",
+      "name": "Redouane Hahlal",
+      "listedPositionGroup": "DEFENSORES",
+      "slug": "redouane-hahlal"
+    },
+    {
+      "country": "Marruecos",
+      "name": "Yassine Gessime",
+      "listedPositionGroup": "DELANTEROS",
+      "slug": "yassine-gessime"
+    },
+    {
+      "country": "Haití",
+      "name": "Alezandre Pierre",
+      "listedPositionGroup": "ARQUEROS",
+      "slug": "alezandre-pierre"
+    },
+    {
+      "country": "Haití",
+      "name": "Wilguens Pauguain",
+      "listedPositionGroup": "DEFENSORES",
+      "slug": "wilguens-pauguain"
+    },
+    {
+      "country": "Haití",
+      "name": "Carls-Fred Sainthe",
+      "listedPositionGroup": "MEDIOCAMPISTAS",
+      "slug": "carls-fred-sainthe"
+    },
+    {
+      "country": "Haití",
+      "name": "Jean-Jaques Danley",
+      "listedPositionGroup": "MEDIOCAMPISTAS",
+      "slug": "jean-jaques-danley"
+    },
+    {
+      "country": "Haití",
+      "name": "Pierre Woodenski",
+      "listedPositionGroup": "MEDIOCAMPISTAS",
+      "slug": "pierre-woodenski"
+    },
+    {
+      "country": "Estados Unidos",
+      "name": "Matt Turner",
+      "listedPositionGroup": "ARQUEROS",
+      "slug": "matt-turner"
+    },
+    {
+      "country": "Australia",
+      "name": "Jordon Bos",
+      "listedPositionGroup": "DEFENSORES",
+      "slug": "jordon-bos"
+    },
+    {
+      "country": "Paraguay",
+      "name": "Roberto Jr. Fernández",
+      "listedPositionGroup": "ARQUEROS",
+      "slug": "roberto-jr-fernandez"
+    },
+    {
+      "country": "Paraguay",
+      "name": "Kaku Romero Gamarra",
+      "listedPositionGroup": "MEDIOCAMPISTAS",
+      "slug": "kaku-romero-gamarra"
+    },
+    {
+      "country": "Alemania",
+      "name": "Nathaniel Brown",
+      "listedPositionGroup": "DEFENSORES",
+      "slug": "nathaniel-brown"
+    },
+    {
+      "country": "Alemania",
+      "name": "Pascal Grob",
+      "listedPositionGroup": "MEDIOCAMPISTAS",
+      "slug": "pascal-grob"
+    }
+  ]
+}
