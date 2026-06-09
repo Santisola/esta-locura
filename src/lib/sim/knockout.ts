@@ -7,6 +7,7 @@ export function simulateKnockoutBracket(
   standings: GroupStanding[][],
   qualifiedThird: ThirdPlaceRanking[],
   entryNames: Map<string, string>,
+  teamStatsById: Map<string, TeamStats>,
   seedBase: string,
 ): {
   bracketStages: BracketStage[]
@@ -21,31 +22,30 @@ export function simulateKnockoutBracket(
     }
   }
 
-  const allTeams = new Map<string, TeamStats>()
+  // Reutiliza las stats completas (lineas) provistas por el simulador del
+  // torneo. Si por algun motivo falta un equipo, cae a un placeholder con el
+  // OVR de la tabla para no romper la simulacion.
+  const fallbackTeam = (entryId: string, name: string, ovr: number): TeamStats => ({
+    id: entryId,
+    name,
+    attack: ovr,
+    midfield: ovr,
+    defense: ovr,
+    goalkeeping: ovr,
+    ovr,
+  })
+
+  const allTeams = new Map<string, TeamStats>(teamStatsById)
   for (const group of standings) {
     for (const entry of group) {
-      allTeams.set(entry.entryId, {
-        id: entry.entryId,
-        name: entry.name,
-        attack: 0,
-        midfield: 0,
-        defense: 0,
-        goalkeeping: 0,
-        ovr: entry.ovr,
-      })
+      if (!allTeams.has(entry.entryId)) {
+        allTeams.set(entry.entryId, fallbackTeam(entry.entryId, entry.name, entry.ovr))
+      }
     }
   }
   for (const entry of qualifiedThird) {
     if (!allTeams.has(entry.entryId)) {
-      allTeams.set(entry.entryId, {
-        id: entry.entryId,
-        name: entry.name,
-        attack: 0,
-        midfield: 0,
-        defense: 0,
-        goalkeeping: 0,
-        ovr: entry.ovr,
-      })
+      allTeams.set(entry.entryId, fallbackTeam(entry.entryId, entry.name, entry.ovr))
     }
   }
 

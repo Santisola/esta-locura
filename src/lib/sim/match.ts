@@ -1,21 +1,19 @@
 import type { SimMatchEvent, SimMatchResult, TeamStats } from './types'
 import { createRng, simulatePoisson } from './rng'
 
-const PLAYER_NAMES_BY_POSITION: Record<string, string[]> = {
-  GK: ['Martínez', 'Dibu', 'Alisson', 'Neuer', 'Courtois', 'Ter Stegen', 'Oblak', 'Donnarumma', 'Ederson', 'Lloris'],
-  DEF: ['Fossati', 'Romero', 'Días', 'Van Dijk', 'Rüdiger', 'Stones', 'Marquinhos', 'Koulibaly', 'Hummels', 'Pavard'],
-  MID: ['Fernández', 'De Paul', 'Mac Allister', 'Lo Celso', 'B费', 'Modric', 'Kroos', 'Bellingham', 'Pedri', 'Valverde'],
-  ATT: ['Messi', 'C.Ronaldo', 'Mbappé', 'Haaland', 'Neymar', 'Kane', 'Lewandowski', 'Vinicius', 'Salah', 'Griezmann'],
-}
-
 const EVENT_MINUTES_BIAS = [8, 22, 31, 39, 44, 51, 58, 67, 73, 78, 82, 87, 90]
 
-function pickPlayerName(rng: () => number, isGoal: boolean): string {
-  const pool = isGoal ? PLAYER_NAMES_BY_POSITION.ATT : PLAYER_NAMES_BY_POSITION.DEF
+// Elige un protagonista del plantel real del equipo. Si por algun motivo no hay
+// roster cargado, devuelve undefined (el evento se muestra sin nombre) en vez de
+// inventar un jugador de otra seleccion.
+function pickFrom(pool: string[] | undefined, rng: () => number): string | undefined {
+  if (!pool || pool.length === 0) return undefined
   return pool[Math.floor(rng() * pool.length)]
 }
 
 function generateGoalEvents(
+  home: TeamStats,
+  away: TeamStats,
   homeScore: number,
   awayScore: number,
   rng: () => number,
@@ -38,7 +36,7 @@ function generateGoalEvents(
         minute,
         type: 'GOAL',
         side: 'HOME',
-        playerName: pickPlayerName(rng, true),
+        playerName: pickFrom(home.roster?.goalScorers, rng),
       })
       homeGoalsLeft--
     } else if (awayGoalsLeft > 0) {
@@ -46,7 +44,7 @@ function generateGoalEvents(
         minute,
         type: 'GOAL',
         side: 'AWAY',
-        playerName: pickPlayerName(rng, true),
+        playerName: pickFrom(away.roster?.goalScorers, rng),
       })
       awayGoalsLeft--
     }
@@ -56,11 +54,11 @@ function generateGoalEvents(
   return events
 }
 
-function generateCardEvents(homeOvr: number, awayOvr: number, rng: () => number): SimMatchEvent[] {
+function generateCardEvents(home: TeamStats, away: TeamStats, rng: () => number): SimMatchEvent[] {
   const events: SimMatchEvent[] = []
 
-  const homeCardChance = Math.max(0, 0.3 - awayOvr / 400)
-  const awayCardChance = Math.max(0, 0.3 - homeOvr / 400)
+  const homeCardChance = Math.max(0, 0.3 - away.ovr / 400)
+  const awayCardChance = Math.max(0, 0.3 - home.ovr / 400)
 
   if (rng() < homeCardChance) {
     const minute = 20 + Math.floor(rng() * 65)
@@ -68,7 +66,7 @@ function generateCardEvents(homeOvr: number, awayOvr: number, rng: () => number)
       minute,
       type: rng() < 0.15 ? 'RED_CARD' : 'YELLOW_CARD',
       side: 'HOME',
-      playerName: pickPlayerName(rng, false),
+      playerName: pickFrom(home.roster?.defenders, rng),
     })
   }
 
@@ -78,55 +76,76 @@ function generateCardEvents(homeOvr: number, awayOvr: number, rng: () => number)
       minute,
       type: rng() < 0.15 ? 'RED_CARD' : 'YELLOW_CARD',
       side: 'AWAY',
-      playerName: pickPlayerName(rng, false),
+      playerName: pickFrom(away.roster?.defenders, rng),
     })
   }
 
   return events
 }
 
-function simulatePenaltyShootout(rng: () => number): [number, number] {
-  let home = 0
-  let away = 0
+// Probabilidad de convertir un penal: base alta, atenuada por el arquero rival.
+function penaltyConversion(opponentGoalkeeping: number): number {
+  return Math.max(0.62, Math.min(0.82, 0.85 - opponentGoalkeeping / 500))
+}
+
+function simulatePenaltyShootout(home: TeamStats, away: TeamStats, rng: () => number): [number, number] {
+  let homeScore = 0
+  let awayScore = 0
   const rounds = 5
   const suddenDeathRounds = 10
 
+  const homeRate = penaltyConversion(away.goalkeeping)
+  const awayRate = penaltyConversion(home.goalkeeping)
+
   for (let round = 0; round < rounds; round++) {
-    if (rng() < 0.75) home++
-    if (rng() < 0.75) away++
+    if (rng() < homeRate) homeScore++
+    if (rng() < awayRate) awayScore++
   }
 
-  if (home !== away) return [home, away]
+  if (homeScore !== awayScore) return [homeScore, awayScore]
 
   for (let round = 0; round < suddenDeathRounds; round++) {
-    const h = rng() < 0.75 ? 1 : 0
-    const a = rng() < 0.75 ? 1 : 0
-    home += h
-    away += a
-    if (h !== a) return [home, away]
+    const h = rng() < homeRate ? 1 : 0
+    const a = rng() < awayRate ? 1 : 0
+    homeScore += h
+    awayScore += a
+    if (h !== a) return [homeScore, awayScore]
   }
 
-  return [home, away]
+  return [homeScore, awayScore]
 }
 
-function calculateExpectedGoals(
-  attack: number,
-  defense: number,
-  goalkeeping: number,
-  opponentOvr: number,
-): number {
-  const rawStrength = (attack * 0.5 + (100 - defense) * 0.25 + (100 - goalkeeping) * 0.25) / 100
-  const scaling = 2.6 * (rawStrength / Math.max(rawStrength, 0.5))
-  return Math.max(0.3, Math.min(scaling, 5))
+const BASE_GOALS = 1.35
+const ATTACK_EXPONENT = 1.25
+
+// Fuerza ofensiva de un equipo: el ataque manda, el mediocampo alimenta.
+function attackingStrength(team: TeamStats): number {
+  return team.attack * 0.62 + team.midfield * 0.38
 }
 
-function calculateOvrScore(homeOvr: number, awayOvr: number, rng: () => number): [number, number] {
-  const totalOvr = homeOvr + awayOvr
-  const homeExpectancy = ((homeOvr / Math.max(totalOvr, 1)) * 2.8) + (rng() * 0.4 - 0.2)
-  const awayExpectancy = ((awayOvr / Math.max(totalOvr, 1)) * 2.8) + (rng() * 0.4 - 0.2)
+// Fuerza defensiva de un equipo: la linea de fondo manda, el arquero sostiene.
+function defensiveStrength(team: TeamStats): number {
+  return team.defense * 0.62 + team.goalkeeping * 0.38
+}
 
-  const homeGoals = simulatePoisson(Math.max(0.2, homeExpectancy), rng)
-  const awayGoals = simulatePoisson(Math.max(0.2, awayExpectancy), rng)
+// Goles esperados (lambda de Poisson) del atacante contra la defensa rival.
+// Compara las lineas reales en vez del OVR plano, de modo que la formacion
+// y los jugadores elegidos en el draft impactan el resultado.
+function expectedGoalsByLines(attacker: TeamStats, defender: TeamStats): number {
+  const attack = attackingStrength(attacker)
+  const defense = defensiveStrength(defender)
+  const ratio = attack / Math.max(defense, 1)
+  const lambda = BASE_GOALS * Math.pow(ratio, ATTACK_EXPONENT)
+  return Math.max(0.18, Math.min(lambda, 4.5))
+}
+
+function calculateLineScore(home: TeamStats, away: TeamStats, rng: () => number): [number, number] {
+  // RNG acotado para mantener sorpresas sin romper la coherencia de las lineas.
+  const homeExpectancy = expectedGoalsByLines(home, away) + (rng() * 0.3 - 0.15)
+  const awayExpectancy = expectedGoalsByLines(away, home) + (rng() * 0.3 - 0.15)
+
+  const homeGoals = simulatePoisson(Math.max(0.15, homeExpectancy), rng)
+  const awayGoals = simulatePoisson(Math.max(0.15, awayExpectancy), rng)
 
   return [homeGoals, awayGoals]
 }
@@ -138,18 +157,18 @@ export function simulateMatch(
   isKnockout: boolean,
 ): SimMatchResult {
   const rng = createRng(seed)
-  const [homeScore, awayScore] = calculateOvrScore(home.ovr, away.ovr, rng)
+  const [homeScore, awayScore] = calculateLineScore(home, away, rng)
 
-  const goalEvents = generateGoalEvents(homeScore, awayScore, rng)
+  const goalEvents = generateGoalEvents(home, away, homeScore, awayScore, rng)
 
   const cardRng = createRng(seed + 1000)
-  const cardEvents = generateCardEvents(home.ovr, away.ovr, cardRng)
+  const cardEvents = generateCardEvents(home, away, cardRng)
 
   const events = [...goalEvents, ...cardEvents].sort((a, b) => a.minute - b.minute)
 
   if (isKnockout && homeScore === awayScore) {
     const penaltyRng = createRng(seed + 2000)
-    const [homePenalties, awayPenalties] = simulatePenaltyShootout(penaltyRng)
+    const [homePenalties, awayPenalties] = simulatePenaltyShootout(home, away, penaltyRng)
 
     const penaltyEvents: SimMatchEvent[] = []
     penaltyRng()
@@ -160,7 +179,7 @@ export function simulateMatch(
           minute,
           type: 'PENALTY_GOAL',
           side: 'HOME',
-          playerName: pickPlayerName(penaltyRng, false),
+          playerName: pickFrom(home.roster?.goalScorers, penaltyRng),
         })
       }
       if (round < awayPenalties) {
@@ -168,7 +187,7 @@ export function simulateMatch(
           minute,
           type: 'PENALTY_GOAL',
           side: 'AWAY',
-          playerName: pickPlayerName(penaltyRng, false),
+          playerName: pickFrom(away.roster?.goalScorers, penaltyRng),
         })
       }
     }

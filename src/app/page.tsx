@@ -44,6 +44,12 @@ export default async function HomePage() {
             >
               Ver torneo
             </Link>
+            <Link
+              href="/historial"
+              className="rounded-2xl border border-white/20 px-8 py-5 font-mono text-sm uppercase tracking-[0.25em] text-sand/70 transition hover:border-white/40 hover:text-sand"
+            >
+              Historial
+            </Link>
           </div>
         </section>
 

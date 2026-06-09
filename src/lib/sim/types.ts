@@ -1,3 +1,10 @@
+// Nombres reales del plantel de un equipo, segmentados para elegir protagonistas
+// coherentes de cada evento (goles desde ataque/medio, tarjetas desde defensa/medio).
+export type TeamRoster = {
+  goalScorers: string[]
+  defenders: string[]
+}
+
 export type TeamStats = {
   id: string
   name: string
@@ -6,6 +13,7 @@ export type TeamStats = {
   defense: number
   goalkeeping: number
   ovr: number
+  roster?: TeamRoster
 }
 
 export type SimMatchEvent = {

@@ -36,6 +36,18 @@ const PITCH_ROWS: Record<string, { label: string; color: string }> = {
   ATT: { label: 'Ataque', color: 'border-l-red/40' },
 }
 
+// Parsea la respuesta como JSON de forma segura. Si el server devuelve HTML
+// (404/500), evita el error cripto "Unexpected token '<'" y retorna null.
+async function readJsonSafe<T>(res: Response): Promise<T | null> {
+  const text = await res.text()
+  if (!text) return null
+  try {
+    return JSON.parse(text) as T
+  } catch {
+    return null
+  }
+}
+
 function normalizeDraftState(state: DraftSessionState): DraftSessionState {
   return {
     ...state,
@@ -225,8 +237,8 @@ export function DraftWorkbench({ summary, formations, countries }: DraftWorkbenc
     setTournamentMessage(null)
     try {
       const res = await fetch('/api/tournaments/singleplayer', { method: 'POST' })
-      const data = await res.json() as { error?: string; tournament?: { tournamentId: string } }
-      if (!res.ok) throw new Error(data.error ?? 'Error.')
+      const data = await readJsonSafe<{ error?: string; tournament?: { tournamentId: string } }>(res)
+      if (!res.ok || !data) throw new Error(data?.error ?? `No se pudo abrir el Mundial (error ${res.status}).`)
       setTournamentId(data.tournament?.tournamentId ?? null)
       setTournamentMessage('Tu seleccion entro al Mundial. Segui la accion en el torneo.')
       setDraftState((s) => s ? { ...s, completedAt: s.completedAt ?? new Date().toISOString() } : s)

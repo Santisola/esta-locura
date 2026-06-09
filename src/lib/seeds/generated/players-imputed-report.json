@@ -1,0 +1,310 @@
+[
+  {
+    "country": "Qatar",
+    "name": "Meshaal Barsham",
+    "status": "imputed_level_2",
+    "ovr": 72,
+    "sample": 29
+  },
+  {
+    "country": "Qatar",
+    "name": "Ayoub Al Alawi",
+    "status": "imputed_level_1",
+    "ovr": 70,
+    "sample": 7
+  },
+  {
+    "country": "Qatar",
+    "name": "Homam El-Amin",
+    "status": "imputed_level_1",
+    "ovr": 70,
+    "sample": 7
+  },
+  {
+    "country": "Qatar",
+    "name": "Hamdy Fathy",
+    "status": "imputed_level_1",
+    "ovr": 74,
+    "sample": 5
+  },
+  {
+    "country": "Qatar",
+    "name": "Mohamed Naceur Al-Mannai",
+    "status": "imputed_level_1",
+    "ovr": 74,
+    "sample": 5
+  },
+  {
+    "country": "Jordania",
+    "name": "Yazid Abulaila",
+    "status": "imputed_level_2",
+    "ovr": 72,
+    "sample": 29
+  },
+  {
+    "country": "Jordania",
+    "name": "Noureddin Bani Attiah",
+    "status": "imputed_level_2",
+    "ovr": 72,
+    "sample": 29
+  },
+  {
+    "country": "Jordania",
+    "name": "Mohammad Abualnadi",
+    "status": "imputed_level_1",
+    "ovr": 70,
+    "sample": 9
+  },
+  {
+    "country": "Jordania",
+    "name": "Saleem Obaid",
+    "status": "imputed_level_1",
+    "ovr": 70,
+    "sample": 9
+  },
+  {
+    "country": "Jordania",
+    "name": "Mohammad Al Dawoud",
+    "status": "imputed_level_1",
+    "ovr": 74,
+    "sample": 6
+  },
+  {
+    "country": "Jordania",
+    "name": "Mohammad Abu Zraiq",
+    "status": "imputed_level_1",
+    "ovr": 76,
+    "sample": 5
+  },
+  {
+    "country": "Jordania",
+    "name": "Odeh Fakhoury",
+    "status": "imputed_level_1",
+    "ovr": 76,
+    "sample": 5
+  },
+  {
+    "country": "Egipto",
+    "name": "Oufa Shobeir",
+    "status": "imputed_level_1",
+    "ovr": 70,
+    "sample": 3
+  },
+  {
+    "country": "Egipto",
+    "name": "El Mahdi Soliman",
+    "status": "imputed_level_1",
+    "ovr": 70,
+    "sample": 3
+  },
+  {
+    "country": "Egipto",
+    "name": "Ahmed Fatouh",
+    "status": "imputed_level_1",
+    "ovr": 73,
+    "sample": 7
+  },
+  {
+    "country": "Uzbekistán",
+    "name": "Abduvokhid Nematov",
+    "status": "imputed_level_2",
+    "ovr": 72,
+    "sample": 29
+  },
+  {
+    "country": "Uzbekistán",
+    "name": "Khozhiakbar Alizhonov",
+    "status": "imputed_level_1",
+    "ovr": 70,
+    "sample": 9
+  },
+  {
+    "country": "Uzbekistán",
+    "name": "Odildzhon Khamrobekov",
+    "status": "imputed_level_1",
+    "ovr": 74,
+    "sample": 7
+  },
+  {
+    "country": "Uzbekistán",
+    "name": "Aziz Ganiev",
+    "status": "imputed_level_1",
+    "ovr": 74,
+    "sample": 7
+  },
+  {
+    "country": "Irán",
+    "name": "Hossein Kanaani",
+    "status": "imputed_level_1",
+    "ovr": 71,
+    "sample": 7
+  },
+  {
+    "country": "Irán",
+    "name": "Dennis Dargahi",
+    "status": "imputed_level_1",
+    "ovr": 76,
+    "sample": 4
+  },
+  {
+    "country": "Irak",
+    "name": "Akam Hashem",
+    "status": "imputed_level_1",
+    "ovr": 66,
+    "sample": 7
+  },
+  {
+    "country": "México",
+    "name": "Guillermo Martínez",
+    "status": "imputed_level_1",
+    "ovr": 76,
+    "sample": 7
+  },
+  {
+    "country": "México",
+    "name": "Armando González",
+    "status": "imputed_level_1",
+    "ovr": 76,
+    "sample": 7
+  },
+  {
+    "country": "Haití",
+    "name": "Alezandre Pierre",
+    "status": "imputed_level_2",
+    "ovr": 71,
+    "sample": 17
+  },
+  {
+    "country": "Haití",
+    "name": "Wilguens Pauguain",
+    "status": "imputed_level_1",
+    "ovr": 71,
+    "sample": 7
+  },
+  {
+    "country": "Haití",
+    "name": "Carls-Fred Sainthe",
+    "status": "imputed_level_1",
+    "ovr": 75,
+    "sample": 5
+  },
+  {
+    "country": "Haití",
+    "name": "Jean-Jaques Danley",
+    "status": "imputed_level_1",
+    "ovr": 76,
+    "sample": 5
+  },
+  {
+    "country": "Haití",
+    "name": "Pierre Woodenski",
+    "status": "imputed_level_1",
+    "ovr": 77,
+    "sample": 5
+  },
+  {
+    "country": "Curazao",
+    "name": "Godfried Roemeratore",
+    "status": "imputed_level_1",
+    "ovr": 70,
+    "sample": 7
+  },
+  {
+    "country": "Curazao",
+    "name": "Bradley Kuwas",
+    "status": "imputed_level_1",
+    "ovr": 73,
+    "sample": 6
+  },
+  {
+    "country": "Cabo Verde",
+    "name": "C. J. Dos Santos",
+    "status": "imputed_level_2",
+    "ovr": 72,
+    "sample": 31
+  },
+  {
+    "country": "Cabo Verde",
+    "name": "Diney Borges",
+    "status": "imputed_level_1",
+    "ovr": 70,
+    "sample": 8
+  },
+  {
+    "country": "Cabo Verde",
+    "name": "Kevin Pina Lenini",
+    "status": "imputed_level_1",
+    "ovr": 68,
+    "sample": 5
+  },
+  {
+    "country": "Túnez",
+    "name": "Abdelmouhib Chamakh",
+    "status": "imputed_level_2",
+    "ovr": 72,
+    "sample": 31
+  },
+  {
+    "country": "Túnez",
+    "name": "Sabri Ben Hassen",
+    "status": "imputed_level_2",
+    "ovr": 72,
+    "sample": 31
+  },
+  {
+    "country": "Arabia Saudita",
+    "name": "Mohammed Al-Shamat",
+    "status": "imputed_level_1",
+    "ovr": 69,
+    "sample": 10
+  },
+  {
+    "country": "Marruecos",
+    "name": "Ajmed Reda Tagnaouti",
+    "status": "imputed_level_2",
+    "ovr": 72,
+    "sample": 31
+  },
+  {
+    "country": "Marruecos",
+    "name": "Redouane Hahlal",
+    "status": "imputed_level_1",
+    "ovr": 75,
+    "sample": 8
+  },
+  {
+    "country": "Japón",
+    "name": "Tsuyoshi Watanbe",
+    "status": "imputed_level_1",
+    "ovr": 74,
+    "sample": 8
+  },
+  {
+    "country": "República Democrática Del Congo",
+    "name": "Mattieu Epolo",
+    "status": "imputed_level_2",
+    "ovr": 73,
+    "sample": 31
+  },
+  {
+    "country": "República Democrática Del Congo",
+    "name": "Samuel Moutussamy",
+    "status": "imputed_level_1",
+    "ovr": 71,
+    "sample": 9
+  },
+  {
+    "country": "Ghana",
+    "name": "Prince Adu",
+    "status": "imputed_level_1",
+    "ovr": 74,
+    "sample": 7
+  },
+  {
+    "country": "Nueva Zelanda",
+    "name": "Eli Just",
+    "status": "imputed_level_1",
+    "ovr": 66,
+    "sample": 8
+  }
+]

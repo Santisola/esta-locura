@@ -8,6 +8,13 @@
       "when": 1780868042663,
       "tag": "0000_vengeful_joseph",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1781046809507,
+      "tag": "0001_silly_leader",
+      "breakpoints": true
     }
   ]
 }

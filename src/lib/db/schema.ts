@@ -116,6 +116,8 @@ export const players = pgTable(
     slug: text('slug').notNull(),
     name: text('name').notNull(),
     shirtNumber: integer('shirt_number'),
+    club: text('club'),
+    birthDate: text('birth_date'),
     primaryPosition: text('primary_position').notNull(),
     secondaryPositions: text('secondary_positions').array().default([]).notNull(),
     attack: integer('attack').notNull(),

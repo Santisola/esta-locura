@@ -1,0 +1,40 @@
+Qatar: 25 — Mahmud Abunada, Meshaal Barsham, Salah Zakaria, Ayoub Al Alawi, Boualem Khoukhi, Homam El-Amin, Lucas Mendes, Issa Laye, Sultan Al-Brake, Al-Hashmi Al-Hussain, Assim Madibo, Abdulaziz Hatem, Hamdy Fathy, Karim Boudiaf, Jassem Gaber, Mohamed Naceur Al-Mannai, Ahmed Al Ganehi, Ahmed Alaaeldin, Akram Afif, Almoez Ali, Edmilson Junior, Hassan Al-Haidos, Mohammed Muntari, Mohamed Surag, Yousef Abdulrazzaq
+Jordania: 24 — Yazid Abulaila, Abdallah Al Fakhouri, Noureddin Bani Attiah, Mohammad Abualnadi, Husam Abu Dahab, Mohannad Abu Taha, Saed Al Rosan, Anas Badawi, Abdallah Nasib, Ihsan Haddad, Saleem Obaid, Mohammad Taha, Mohammad Al Dawoud, Nizar Al Rashdan, Noor Al Rawabdeh, Rajaei Ayed, Amer Jamous, Yousef Qashi, Ibrahim Sadeh, Mohammad Abu Zraiq, Ali Azaizeh, Odeh Fakhoury, Ali Olwan, Ibrahim Sabra
+Sudáfrica: 23 — Ronwen Williams, Ricardo Goss, Sipho Chaine, Khuliso Mudau, Bradley Cross, Aubrey Modiba, Thabang Matuludi, Nkosinathi Sibisi, Ime Okon, Samukele Kabini, Mbekezeli Mbokazi, Kamogelo Sebelebele, Khulumani Ndamane, Teboho Mokoena, Thalente Mbatha, Jayden Adams, Oswin Appollis, Tshepang Moremi, Evidence Makgopa, Iqraam Rayners, Relebohile Mofokeng, Themba Zwane, Thapelo Maseko
+Egipto: 23 — Oufa Shobeir, Mohamed El Shenawy, Mohamed Alaa, El Mahdi Soliman, Mohamed Abdelmonem, Hossam Abdelmaguid, Ramy Rabia, Yasser Ibrahim, Ahmed Fatouh, Karim Hafez, Mohamed Hany, Tarek Alaa, Marwan Ateya, Mohanad Lasheen, Hamdy Fathy, Nabil Dunga, Emam Ashour, Mahmoud Saber, Trezeguet, Ibrahim Adel, Mostafa Ziko, Zizo, Hamza Abdelkarim
+Uzbekistán: 23 — Utkir Yusupov, Botirali Ergashev, Abduvokhid Nematov, Khozhiakbar Alizhonov, Farrukh Sayfiev, Rustam Ashurmatov, Sherzod Nasrullaev, Umar Eshmurodov, Avazbek Ulmasaliev, Jakhongir Urozov, Bekhruz Karimov, Abdulla Abdullaev, Akmal Mozgovoy, Jamshid Iskanderov, Odildzhon Khamrobekov, Jaloliddin Masharipov, Aziz Ganiev, Sherzod Esanov, Abbosbek Fayzullaev, Igor Sergeev, Azizbek Amanov, Oston Urunov, Dostonbek Khamdamov
+Irán: 19 — Alireza Beiranvand, Payam Niazmand, Danial Eiri, Saleh Hardani, Hossein Kanaani, Shoja Khalilzadeh, Ali Nemati, Ramin Rezaeian, Rouzbeh Cheshmi, Saeid Ezatolahi, Mehdi Ghayedi, Mohammad Ghorbani, Mohammad Mohebi, Amir Mohammad Razzaghinia, Mehdi Torabi, Aria Yousefi, Dennis Dargahi, Amirhossein Hosseinzadeh, Shahriar Moghanlou
+Irak: 16 — Fahad Talib, Jalal Hassan, Ahmed Basil Fadhil, Manaf Younis, Zaid Tahseen, Rebin Sulaka, Frans Dhia Putros, Akam Hashem, Merchas Doski, Zaid Ismail, Mustafa Saadoon, Ibrahim Bayesh, Ali Jasim, Ali Yousif, Aymen Hussein, Mohanad Ali
+México: 14 — Raúl Rangel, Carlos Acevedo, Jesús Gallardo, Mateo Chávez, Erik Lira, Luis Romo, Álvaro Fidalgo, Luis Chávez, Gilberto Mora, Guillermo Martínez, Armando González, Alexis Vega, Roberto Alvarado, César Huerta
+Haití: 13 — Alezandre Pierre, Josué Duverger, Wilguens Pauguain, Duke Lacroix, Martin Experience, Keeto Thermoncy, Leverton Pierre, Carls-Fred Sainthe, Jean-Jaques Danley, Pierre Woodenski, Dominique Simon, Wilson Isidor, Yassin Fortune
+Panamá: 13 — Orlando Mosquera, César Samudio, César Blackman, Fidel Escobar, Edgardo Fariña, Eric Davis, Jiovani Ramos, Roderick Miller, César Yanis, Yoel Bárcenas, Alberto Quintero, Azarías Londoño, Tomás Rodríguez
+Bosnia: 11 — Martin Zlomislić, Osman Hadžikić, Tarik Muharemović, Stjepan Radeljić, Nidal Čelik, Ivan Bašić, Ermin Mahmić, Amar Memić, Kerim Alajbegović, Jovo Lukić, Samed Baždar
+Curazao: 11 — Tyrick Bodak, Trevor Doornbusch, Joshua Brenet, Deveron Fonville, Livano Comenencia, Tyrese Noslin, Godfried Roemeratore, Gervane Kastaneer, Kenji Gorré, Jearl Margaritha, Bradley Kuwas
+Cabo Verde: 11 — Vozinha, C. J. Dos Santos, Diney Borges, Stopira, Kelvin Pires, Kevin Pina Lenini, Laros Duarte, Yannick Semedo, Willy Semedo, Jovane Cabral, Benchimol
+Uruguay: 11 — Sergio Rochet, Sebastián Cáceres, Guillermo Varela, Matías Viña, Joaquín Piquerez, Juan Manuel Sanabria, Giorgian De Arrascaeta, Agustín Canobbio, Brian Rodríguez, Federico Viñas, Rodrigo Aguirre
+Túnez: 9 — Abdelmouhib Chamakh, Sabri Ben Hassen, Adem Arous, Raed Chikhaoui, Mohamed Amine Ben Hamida, Khalil Ayari, Firas Chaouat, Hazem Mastouri, Rayan Elloumi
+Arabia Saudita: 9 — Ahmed Al-Kassar, Jehad Thakri, Hassan Al-Tambakti, Mohammed Al-Shamat, Mohamed Kanno, Abdullah Al-Khaibari, Musab Al-Juwayr, Abdullah Al-Hamdan, Khalid Al-Ghannam
+Paraguay: 8 — Orlando Gill, Fabián Balbuena, Gustavo Gómez, Alexandro Maidana, Junior Alonso, Damián Bobadilla, Mauricio Magalhães, Isidro Pitta
+Corea Del Sur: 7 — Song Bum-keun, Cho Wi-je, Kim Tae-hyeon, Seol Young-woo, Hwang In-beom, Kim Jin-gyu, Lee Dong-gyeong
+Marruecos: 7 — Munir El Kajoui, Ajmed Reda Tagnaouti, Youssef Belammari, Redouane Hahlal, Ayyoub Bouaddi, Samir El Mourabet, Ayoube Amaimouni
+Turquía: 7 — Ugurcan Cakir, Altay Bayindir, Ferdi Kadioglu, Samet Akaydin, Kenan Yildiz, Baris Alper Yilmaz, Oguz Aydin
+Argelia: 7 — Oussama Benbot, Melvin Mastil, Abdelatif Ramdane, Achref Abada, Mohamed Amine Tougai, Nadhir Benbouali, Adil Boulbina
+Colombia: 7 — Camilo Vargas, Santiago Arias, Willer Ditta, Richard Ríos, Kevin Castaño, James Rodríguez, Jhon Córdoba
+Japón: 6 — Tomoki Hayakawa, Keisuke Osako, Yuto Nagatomo, Tsuyoshi Watanbe, Kento Shiogai, Keisuke Goto
+Noruega: 5 — Orjan Haskjold Nyland, Fredrik Bjorkan, Henrik Falchener, Torbjorn Heggem, Alexander Sorloth
+República Democrática Del Congo: 5 — Mattieu Epolo, Aaron Tshibola, Samuel Moutussamy, Théo Bongonda, Fiston Kalala Mayele
+República Checa: 4 — Vladimir Darida, Hugo Sochurek, Alexandr Sojka, Denis Visinsky
+Brasil: 4 — Weverton, Douglas Santos, Léo Pereira, Luiz Henrique
+Ecuador: 4 — Félix Torres, Alan Franco, Enner Valencia, Gonzalo Plata
+Ghana: 4 — Benjamin Asare, Derrick Luckassen, Caleb Yirenkyi, Prince Adu
+Australia: 3 — Milos Degenek, Lucas Herrington, Paul Okon-Engstler
+Escocia: 2 — Findlay Curtis, Ben Gannon-Doak
+Nueva Zelanda: 2 — Eli Just, Jesse Randall
+España: 2 — Álex Grimaldo, Víctor Muñoz
+Canadá: 1 — Marcelo Flores
+Estados Unidos: 1 — Alejandro Zendejas
+Alemania: 1 — Pascal Grob
+Costa De Marfil: 1 — Christ Inao Oulaï
+Senegal: 1 — Bara Sapoko Ndiaye
+Austria: 1 — Florian Wiegele
+Croacia: 1 — Toni Fruk
