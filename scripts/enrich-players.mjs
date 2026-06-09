@@ -160,6 +160,163 @@ const POSITION_RATINGS = {
   ST: { attack: 85, midfield: 60, defense: 28, goalkeeping: 5, ovr: 80 },
 }
 
+const NATIONAL_TEAM_KEYWORDS = [
+  'national team',
+  'national football',
+  'national association',
+  "men's national",
+  "women's national",
+  'under-',
+  'youth team',
+  'national under',
+]
+
+function isNationalTeam(label) {
+  if (!label) return false
+  const lower = label.toLowerCase()
+  return NATIONAL_TEAM_KEYWORDS.some((kw) => lower.includes(kw))
+}
+
+const ELITE_CLUBS = new Set([
+  'Real Madrid Club de Fútbol', 'Fc Barcelona', 'FC Barcelona',
+  'FC Bayern Munich', 'Manchester City F.C.', 'Liverpool F.C.',
+  'Paris Saint-Germain F.C.', 'Paris Saint-Germain FC',
+  'Arsenal F.C.', 'Chelsea F.C.', 'Manchester United F.C.',
+  'FC Internazionale Milano', 'AC Milan', 'Juventus F.C.',
+  'Atlético Madrid', 'Borussia Dortmund', 'Tottenham Hotspur F.C.',
+  'FC Bayern Munich', 'Bayer 04 Leverkusen',
+])
+
+const STRONG_CLUBS = new Set([
+  'RB Leipzig', 'SSC Napoli', 'S.S.C. Napoli', 'AS Roma', 'S.S. Lazio',
+  'ACF Fiorentina', 'Atalanta B.C.', 'Bologna FC', 'S.L. Benfica',
+  'FC Porto', 'Sporting CP', 'AFC Ajax', 'PSV Eindhoven',
+  'Feyenoord Rotterdam', 'Celtic F.C.', 'Rangers F.C.',
+  'Club Brugge KV', 'Galatasaray S.K.', 'Fenerbahçe S.K.',
+  'Shakhtar Donetsk', 'FC Dynamo Kyiv', 'SK Slavia Prague',
+  'AC Sparta Prague', 'FC København', 'Olympiacos F.C.',
+  'Crvena Zvezda', 'FC Red Bull Salzburg',
+  'West Ham United F.C.', 'Newcastle United F.C.',
+  'Aston Villa F.C.', 'Brighton & Hove Albion F.C.',
+  'Crystal Palace F.C.', 'Everton F.C.', 'Fulham F.C.',
+  'Wolverhampton Wanderers F.C.', 'Nottingham Forest F.C.',
+  'Brentford F.C.', 'AFC Bournemouth',
+  'Sevilla FC', 'Villarreal CF', 'Real Betis Balompié',
+  'Real Sociedad', 'Athletic Bilbao', 'Valencia CF',
+  'Olympique Lyonnais', 'Olympique de Marseille',
+  'AS Monaco FC', 'LOSC Lille', 'OGC Nice', 'Stade Rennais F.C.',
+  'RC Lens', 'RC Strasbourg Alsace', 'Stade de Reims',
+  'VfB Stuttgart', 'Eintracht Frankfurt', 'Borussia Mönchengladbach',
+  'VfL Wolfsburg', 'SC Freiburg', 'TSG 1899 Hoffenheim',
+  '1. FC Union Berlin', '1. FC Köln', 'SV Werder Bremen',
+  '1. FSV Mainz 05', 'FC Augsburg', 'FC Porto',
+  'Sporting Clube de Portugal', 'SL Benfica',
+  'AFC Ajax', 'PSV', 'Feyenoord',
+  'Galatasaray', 'Fenerbahçe', 'Beşiktaş JK',
+  'FC Shakhtar Donetsk', 'FC Dynamo Kyiv',
+  'AC Sparta Praha', 'SK Slavia Praha',
+  'FC København', 'Brøndby IF',
+  'BSC Young Boys', 'FC Basel',
+  'PAOK FC', 'Olympiacos',
+  'GNK Dinamo Zagreb', 'HNK Hajduk Split',
+  'FK Crvena zvezda', 'FK Partizan',
+  'FC Midtjylland', 'FC Nordsjælland',
+  'SK Rapid Wien', 'FK Austria Wien',
+  'K.A.S. Eupen', 'K.R.C. Genk', 'KAA Gent', 'R.S.C. Anderlecht',
+  'Royal Antwerp F.C.', 'Royale Union Saint-Gilloise', 'Standard Liège',
+  'Cercle Brugge K.S.V.', 'S.C. Braga', 'Rio Ave F.C.', 'Vitória F.C.',
+  'AZ Alkmaar', 'FC Groningen', 'FC Twente', 'FC Utrecht',
+  'N.E.C.', 'PEC Zwolle', 'SC Heerenveen', 'Sparta Rotterdam',
+  'Willem II', 'ADO Den Haag', 'FC Emmen', 'RKC Waalwijk',
+  'AL Hilal SFC',
+])
+
+const WEAK_CLUBS = new Set([
+  'Al Ahli FC', 'Al Ahli SC', 'Al Hilal SFC', 'Al Ittihad FC',
+  'Al Qadsiah FC', 'Al Sadd Sports Club', 'Al Wehda FC',
+  'Al-Arabi SC', 'Al-Duhail SC', 'Al-Ettifaq FC', 'Al-Faisaly SC',
+  'Al-Feiha FC', 'Al-Gharafa SC', 'Al-Hussein SC', 'Al-Kahraba',
+  'Al-Karma SC', 'Al-Khor Sports Club', 'Al-Nassr',
+  'Al-Quwa Al-Jawiya', 'Al-Rayyan', 'Al-Shabab Football Club',
+  'Al-Wakrah Sports Club', 'Al-Wehdat SC', 'Al-Zawra\'a SC',
+  'Kalba FC', 'Al Ain FC', 'Al Ahly SC',
+  'Inter Miami CF', 'Atlanta United FC', 'Chicago Fire FC',
+  'FC Cincinnati', 'Colorado Rapids', 'Columbus Crew',
+  'FC Dallas', 'LA Galaxy', 'LA Galaxy II', 'Los Angeles FC',
+  'Minnesota United FC', 'CF Montréal', 'New York City FC',
+  'Philadelphia Union', 'Portland Timbers',
+  'San Jose Earthquakes', 'Seattle Sounders FC', 'Toronto FC',
+  'Orlando City SC', 'Real Salt Lake', 'Sporting Kansas City',
+  'New England Revolution', 'DC United', 'Vancouver Whitecaps FC',
+  'FC Tokyo', 'Cerezo Osaka', 'Gamba Osaka', 'Nagoya Grampus',
+  'Sanfrecce Hiroshima', 'Shonan Bellmare', 'Urawa Red Diamonds',
+  'Yokohama FC', 'Kashima Antlers', 'Kashiwa Reysol',
+  'Kawasaki Frontale', 'Jeonbuk Hyundai Motors FC',
+  'Ulsan HD FC', 'Gwangju FC', 'Gangwon FC',
+  'Mamelodi Sundowns F.C.', 'Orlando Pirates F.C.',
+  'SuperSport United F.C.', 'Kaizer Chiefs F.C.',
+  'Zamalek SC', 'Pyramids FC', 'ENPPI SC', 'Ismaily SC', 'Smouha SC',
+  'Espérance Sportive de Tunis', 'CS Sfaxien', 'US Monastir',
+  'Club Athletico Paranaense', 'Clube Atlético Mineiro',
+  'Clube de Regatas do Flamengo', 'Cruzeiro E.C.',
+  'Fluminense FC', 'Grêmio FBPA', 'Santos F.C.',
+  'Sociedade Esportiva Palmeiras', 'Sport Club Corinthians Paulista',
+  'CR Vasco da Gama', 'Botafogo de Futebol e Regatas',
+  'Sport Club Internacional', 'São Paulo FC',
+  'Boca Juniors', 'Club Atlético Huracán',
+  'Club Atlético Independiente', 'Club Atlético Patronato',
+  'Club Atlético River Plate', 'Defensa y Justicia',
+  'Estudiantes de La Plata', 'Racing Club de Avellaneda',
+  'Club de Gimnasia y Esgrima La Plata', 'Club Atlético Rosario Central',
+  'Club Atlético Banfield', 'Club Atlético Lanús',
+  'C.D. Guadalajara', 'CF Pachuca', 'Club América',
+  'Club León', 'Club Necaxa', 'Club Santos Laguna',
+  'Cruz Azul', 'FC Juárez', 'Monterrey', 'Pumas UNAM',
+  'Querétaro F.C.', 'Tigres UANL', 'Club Tijuana',
+  'Hebei F.C.', 'Shanghai Shenhua', 'Shanghai Port FC',
+  'Beijing Guoan', 'Guangzhou FC', 'Shandong Taishan',
+  'Najran SC', 'Adelaide United Football Club',
+  'Central Coast Mariners FC', 'Newcastle Jets FC',
+  'Melbourne City FC', 'Perth Glory FC', 'Sydney FC',
+  'Brisbane Roar FC', 'Wellington Phoenix FC',
+  'Alianza F.C.', 'Auckland City FC', 'Auckland FC',
+  'Cerro Porteño', 'Club Guaraní', 'Club Libertad',
+  'Club Nacional', 'Club Nacional de Football',
+  'Club Atlético Peñarol', 'Montevideo Wanderers Fútbol Club',
+  'Liga Deportiva Universitaria de Quito',
+  'Barcelona S.C.', 'Club Sport Emelec', 'Independiente del Valle',
+  'Millonarios', 'Atlético Nacional', 'Junior de Barranquilla',
+  'Deportivo Cali', 'Independiente Santa Fe',
+])
+
+const LEAGUE_KEYWORDS = new Set([
+  'Al-', 'Al ', 'al-',
+  'MLS', 'Major League Soccer',
+  'J1 League', 'J.League', 'J-League',
+  'K League', 'K-League',
+  'Super League', 'Chinese Super',
+  'Saudi Pro League', 'Saudi League',
+  'Liga MX', 'Liga BBVA MX',
+])
+
+function getClubTier(clubName) {
+  if (!clubName) return -5
+  const normalized = normalizeText(clubName)
+  for (const elite of ELITE_CLUBS) {
+    if (normalizeText(elite) === normalized) return 7
+  }
+  for (const strong of STRONG_CLUBS) {
+    if (normalizeText(strong) === normalized) return 3
+  }
+  for (const weak of WEAK_CLUBS) {
+    if (normalizeText(weak) === normalized) return -3
+  }
+  for (const keyword of LEAGUE_KEYWORDS) {
+    if (normalized.includes(keyword)) return -3
+  }
+  return -1
+}
+
 function normalizeText(value) {
   return value
     .normalize('NFD')
@@ -467,24 +624,41 @@ function getHeightCm(entity) {
   return null
 }
 
-function getCurrentClubId(entity) {
+function normalizeWikidataDate(dateStr) {
+  if (!dateStr) return null
+
+  const cleaned = dateStr.slice(1, 11)
+
+  return cleaned.replace(/-00/g, '-01')
+}
+
+function getCurrentTeamIds(entity) {
   const claims = entity?.claims?.P54 ?? []
+  const now = new Date()
+  const threeMonthsAgo = new Date(now)
+  threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3)
+  const cutoff = threeMonthsAgo.toISOString().slice(0, 10)
+  const teamIds = []
 
   for (const claim of claims) {
     const endTime = claim?.qualifiers?.P582?.[0]?.datavalue?.value?.time
 
     if (endTime) {
-      continue
+      const endDate = normalizeWikidataDate(endTime)
+
+      if (endDate && endDate < cutoff) {
+        continue
+      }
     }
 
     const id = claim?.mainsnak?.datavalue?.value?.id
 
     if (typeof id === 'string') {
-      return id
+      teamIds.push(id)
     }
   }
 
-  return claims[0]?.mainsnak?.datavalue?.value?.id ?? null
+  return teamIds
 }
 
 function mapPositionLabelsToCodes(positionLabels) {
@@ -545,7 +719,7 @@ function createDeterministicJitter(seed) {
     hash = (hash * 31 + character.charCodeAt(0)) % 1000003
   }
 
-  return (hash % 7) - 3
+  return (hash % 5) - 2
 }
 
 function clamp(value, min, max) {
@@ -558,19 +732,22 @@ function applyRatingAdjustments(baseRatings, player) {
   let ageBoost = 0
 
   if (age != null) {
-    if (age >= 24 && age <= 30) {
-      ageBoost = 2
+    if (age >= 24 && age <= 28) {
+      ageBoost = 1
     } else if (age <= 20 || age >= 35) {
       ageBoost = -2
     }
   }
 
+  const clubTierBonus = getClubTier(player.club)
+  const totalBoost = jitter + ageBoost + clubTierBonus
+
   return {
-    attack: clamp(baseRatings.attack + jitter + ageBoost, 1, 99),
-    midfield: clamp(baseRatings.midfield + jitter + ageBoost, 1, 99),
-    defense: clamp(baseRatings.defense + jitter + ageBoost, 1, 99),
-    goalkeeping: clamp(baseRatings.goalkeeping + jitter + ageBoost, 1, 99),
-    ovr: clamp(baseRatings.ovr + jitter + ageBoost, 1, 99),
+    attack: clamp(baseRatings.attack + totalBoost, 1, 99),
+    midfield: clamp(baseRatings.midfield + totalBoost, 1, 99),
+    defense: clamp(baseRatings.defense + totalBoost, 1, 99),
+    goalkeeping: clamp(baseRatings.goalkeeping + totalBoost, 1, 99),
+    ovr: clamp(baseRatings.ovr + totalBoost, 1, 99),
   }
 }
 
@@ -610,10 +787,10 @@ async function main() {
       linkedIds.add(positionId)
     }
 
-    const clubId = getCurrentClubId(entity)
+    const teamIds = getCurrentTeamIds(entity)
 
-    if (clubId) {
-      linkedIds.add(clubId)
+    for (const teamId of teamIds) {
+      linkedIds.add(teamId)
     }
   }
 
@@ -641,8 +818,14 @@ async function main() {
     const chosenPositions = choosePositions(positionCodes, player.listedPositionGroup)
     const baseRatings = POSITION_RATINGS[chosenPositions.primary] ?? POSITION_RATINGS.ST
     const birthDate = entity ? getBirthDate(entity) : null
-    const clubId = entity ? getCurrentClubId(entity) : null
     const heightCm = entity ? getHeightCm(entity) : null
+    const teamIds = entity ? getCurrentTeamIds(entity) : []
+    const clubId = teamIds.find((id) => {
+      const label = labelCache[id]
+      return label && !isNationalTeam(label)
+    }) ?? teamIds[0] ?? null
+    const clubName = clubId ? (labelCache[clubId] ?? null) : null
+
     const enriched = {
       country: player.country,
       countrySlug: slugify(player.country),
@@ -657,7 +840,7 @@ async function main() {
       enrichmentStatus: searchHit ? 'matched' : 'unmatched',
       birthDate,
       heightCm,
-      club: clubId ? labelCache[clubId] ?? null : null,
+      club: clubName,
       shirtNumber: null,
       isCaptain: false,
       ...applyRatingAdjustments(baseRatings, {
@@ -665,6 +848,7 @@ async function main() {
         name: player.player,
         birthDate,
         primaryPosition: chosenPositions.primary,
+        club: clubName,
       }),
     }
 

@@ -106,7 +106,7 @@ export async function createSingleplayerTournament(sessionToken: string) {
   })
 
   if (existingTournament) {
-    return { tournamentId: existingTournament.id, reused: true }
+    await db.delete(tournaments).where(eq(tournaments.id, existingTournament.id))
   }
 
   const draftedPlayers = await db

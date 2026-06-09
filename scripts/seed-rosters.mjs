@@ -138,12 +138,57 @@ for (const player of readyPlayers) {
 const teamResults = []
 const playerResults = []
 
+const LANE_MAP = {
+  GK: 'GK',
+  CB: 'DEF', LB: 'DEF', RB: 'DEF', LWB: 'DEF', RWB: 'DEF', SW: 'DEF',
+  CDM: 'MID', CM: 'MID', CAM: 'MID', LM: 'MID', RM: 'MID',
+  ST: 'FWD', CF: 'FWD', LW: 'FWD', RW: 'FWD', LF: 'FWD', RF: 'FWD',
+}
+
+const LANE_WEIGHTS = { GK: 1, DEF: 4, MID: 3, FWD: 3 }
+
+const LANE_RATING_KEYS = {
+  GK: ['goalkeeping'],
+  DEF: ['defense'],
+  MID: ['midfield'],
+  FWD: ['attack'],
+}
+
+function computeBestXiRatings(players) {
+  const byLane = { GK: [], DEF: [], MID: [], FWD: [] }
+  for (const player of players) {
+    const lane = LANE_MAP[player.primaryPosition] ?? 'FWD'
+    byLane[lane].push(player)
+  }
+  for (const lane of Object.keys(byLane)) {
+    byLane[lane].sort((a, b) => b.ovr - a.ovr)
+  }
+  const laneAverages = {}
+  let totalWeight = 0
+  for (const [lane, count] of Object.entries(LANE_WEIGHTS)) {
+    const squad = byLane[lane] ?? []
+    const selected = squad.slice(0, count)
+    if (selected.length === 0) continue
+    const laneOvrAvg = Math.round(selected.reduce((s, p) => s + p.ovr, 0) / selected.length)
+    const key = LANE_RATING_KEYS[lane][0]
+    laneAverages[key] = laneOvrAvg
+    totalWeight += count
+  }
+  const allSelected = Object.entries(LANE_WEIGHTS).flatMap(([lane, count]) =>
+    (byLane[lane] ?? []).slice(0, count)
+  )
+  const xiOvr = Math.round(allSelected.reduce((s, p) => s + p.ovr, 0) / allSelected.length)
+  return {
+    attack: laneAverages.attack ?? 50,
+    midfield: laneAverages.midfield ?? 50,
+    defense: laneAverages.defense ?? 50,
+    goalkeeping: laneAverages.goalkeeping ?? 50,
+    ovr: xiOvr,
+  }
+}
+
 for (const group of grouped.values()) {
-  const averages = ['attack', 'midfield', 'defense', 'goalkeeping', 'ovr'].reduce((accumulator, key) => {
-    const total = group.players.reduce((sum, player) => sum + player[key], 0)
-    accumulator[key] = Math.round(total / group.players.length)
-    return accumulator
-  }, {})
+  const averages = computeBestXiRatings(group.players)
 
   const confederation = CONFEDERATION_BY_COUNTRY[group.country] ?? 'INVITED'
   const code = COUNTRY_CODE_BY_COUNTRY[group.country] ?? group.countrySlug.slice(0, 3).toUpperCase()
