@@ -56,12 +56,18 @@ function computeDraftedTeamRatings(
     return average(group.map((p) => Number(p[attribute])))
   }
 
+  const attack = laneRating('ATT', 'attack')
+  const midfield = laneRating('MID', 'midfield')
+  const defense = laneRating('DEF', 'defense')
+  const goalkeeping = laneRating('GK', 'goalkeeping')
+
   return {
-    attack: laneRating('ATT', 'attack'),
-    midfield: laneRating('MID', 'midfield'),
-    defense: laneRating('DEF', 'defense'),
-    goalkeeping: laneRating('GK', 'goalkeeping'),
-    ovr: overallOvr,
+    attack,
+    midfield,
+    defense,
+    goalkeeping,
+    // La media = promedio de las 4 líneas (coincide con el box score del draft).
+    ovr: Math.round((attack + midfield + defense + goalkeeping) / 4),
   }
 }
 

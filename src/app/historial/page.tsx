@@ -1,6 +1,6 @@
 import Link from 'next/link'
 
-import { getOrCreateSessionToken } from '@/lib/draft/session-token'
+import { getSessionTokenReadOnly } from '@/lib/draft/session-token'
 import { getUserTournamentHistory } from '@/lib/tournaments/history'
 
 function formatDate(iso: string | null) {
@@ -17,8 +17,8 @@ function formatDate(iso: string | null) {
 }
 
 export default async function HistorialPage() {
-  const sessionToken = await getOrCreateSessionToken()
-  const history = await getUserTournamentHistory(sessionToken)
+  const sessionToken = await getSessionTokenReadOnly()
+  const history = sessionToken ? await getUserTournamentHistory(sessionToken) : []
   const titles = history.filter((h) => h.isChampion).length
 
   return (

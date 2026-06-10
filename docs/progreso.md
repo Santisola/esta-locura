@@ -58,6 +58,32 @@ Rediseño visual completo al estilo editorial-deportivo "7-0" (crema, tipografí
 - **Verificado en preview** (datos reales): home, draft (con picker de Marruecos real + asignación), campaña completa (feed con goleadores reales + card resumen "4-2") renderizan correctamente; `tsc` sin errores.
 - **Pendiente del rediseño**: aún no se tocó el body global (cada página setea su propio fondo, así que conviven sin romperse). Posibles mejoras: selector de "Estilo" (Defensivo/Equilibrado/Ofensivo), banderas/códigos de país, swap de jugadores en la cancha.
 
+### Animaciones de interacción + fix cookie en páginas (2026-06-10)
+- **Animaciones** (sin dependencias, keyframes Tailwind en `tailwind.config.ts` + guard `prefers-reduced-motion` en `globals.css`):
+  - Campaña: cada partido revelado entra con `rowIn` (slide-up) y el marcador "salta" con `popScore`; card resumen, detalle y preview con `fadeUp`.
+  - Draft: la ficha del jugador aparece en la cancha con `pop` al asignarlo (key distinto fuerza el montaje); el picker de país entra con `slideIn`; botones de asignar con `active:scale-90`; el dado del botón Tirar gira en hover; CTAs con `active:scale`.
+  - Verificado: los 5 keyframes + utilidades `animate-*` están en el CSS compilado.
+- **Bug arreglado (pre-existente)**: `/tournament` y `/historial` daban 500 al entrar sin cookie previa, porque el Server Component intentaba **crear** la cookie (Next no permite escribir cookies en render). Nuevo `getSessionTokenReadOnly()` (solo lectura) usado por esas páginas; la cookie se crea desde los Route Handlers. Las 3 páginas ahora dan 200.
+
+### Rediseño de la card del Mundial (2026-06-10)
+- La imagen OG (`/tournament/[id]/card`) pasó de un formato simple (landscape, solo resultado) a una **ficha vertical (1080×1350)** con identidad albiceleste (gradiente índigo→violeta, acentos celestes, logo "ESTA LOCURA").
+- Ahora muestra: **plantel completo** del equipo draft (11 jugadores con posición en español + rating, ordenados por línea) y los **resultados de los partidos** de la campaña (etapa, rival, marcador con color, punto verde/rojo/gris, penales). Más media del equipo, GF/GC y goleador.
+- `card-data.ts` extendido: devuelve `squad[]`, `matches[]` y `ovr` además de lo anterior.
+- Detalle Satori: los ✓/✗ no existen en la fuente por defecto → se usan puntos de color (divs) para el resultado.
+- Verificado renderizando el PNG real (plantel + 4 partidos + resumen correctos). `tsc` sin errores.
+
+### Tuning del motor: demasiadas sorpresas (2026-06-10)
+- **Problema**: las medias casi no influían en el resultado → equipos débiles salían campeones, favoritos claros caían seguido. Medido: con el exponente viejo (1.25), un gap de 20 de media daba al favorito solo **58%** de victoria; gap 16 → 53% (casi moneda al aire).
+- **Causa**: las medias están comprimidas (~70-90), así que el cociente ataque/defensa entre dos equipos queda cerca de 1; el exponente `1.25` no expandía esa diferencia.
+- **Fix**: `ATTACK_EXPONENT` de `1.25` → **`2.5`** en `match.ts`. Ahora el favorito gana según la brecha: parejos (gap 6) 49%, gap 10 → 58%, gap 16 → 69%, gap 20 → **77%** (sorpresa rara). Equipos iguales siguen 37/37 (simétrico).
+- **Verificado** (6 torneos reales): campeones pasaron a ser equipos del tercio alto (Inglaterra/Brasil 85, Uruguay 82, etc.); los débiles ya no ganan. `tsc` sin errores.
+- **Nota**: los torneos ya simulados conservan su resultado; el cambio aplica a torneos nuevos.
+
+### Fix consistencia del box score (2026-06-10)
+- **Problema**: la Media (OVR) del box score no cuadraba con Ataque/Defensa. Causa: la Media era el promedio del `ovr` de los 11 jugadores, mientras Ataque/Defensa eran promedios de atributos de subconjuntos (delanteros/defensores), y no se mostraban Medio ni Arquero.
+- **Fix**: el box score ahora muestra las **4 líneas** (Ataque/Medio/Defensa/Arquero) y la **Media = promedio de esas 4 líneas** (`draft-workbench.tsx`). Además se alineó el servidor (`computeDraftedTeamRatings` en `singleplayer.ts`): `ovr = round((attack+midfield+defense+goalkeeping)/4)`, así la OVR del torneo coincide con la del draft.
+- **Verificado** (DB): atk 84 / med 77 / def 81 / gk 82 → media 81 = round(mean) = OVR almacenada. Consistente. `tsc` sin errores.
+
 ### Iteración 2 del rediseño (2026-06-10)
 - **Paleta Albiceleste**: re-tematizado de crema a **celeste / azul / violeta** (referencia Selección Argentina). En `tailwind.config.ts` se repurpusieron los tokens (paper=celeste claro, bone=blanco, ink=índigo profundo, vermillion=violeta, gold=celeste) y se agregaron `celeste/azul/violeta` para gradientes. CTAs principales con gradiente celeste→violeta. Sombras duras al nuevo índigo.
 - **Sin "7-0"**: se eliminó el logo "7–0" de home y draft; nuevo wordmark "ESTA LOCURA" con badge gradiente "EL" y "LOCURA" en gradiente. Verificado: sin refs a `7-0`/`Sete` en el código.
@@ -88,7 +114,7 @@ Rediseño visual completo al estilo editorial-deportivo "7-0" (crema, tipografí
 - Simulación numérica (2000 partidos/escenario): fuerte vs débil 65% / 14% (favoritismo con upsets), parejos ~equilibrado, ~2.5–3.0 goles por partido (realista), determinismo por seed confirmado.
 
 **Notas / pendientes derivados:**
-- Existe un leve sesgo home/away en partidos parejos (~34% vs 41%) por el orden de consumo del RNG. No es ventaja de localía real (los fixtures asignan local/visitante arbitrariamente); es artefacto de muestreo. Pre-existente, no regresión. Se puede pulir más adelante.
+- ~~Existe un leve sesgo home/away (~34% vs 41%)~~ **CORREGIDO (2026-06-10)**: era un error de medición (pocas muestras + semillas mal distribuidas). Con 200.000 partidos entre equipos idénticos el motor es simétrico (local 37.12% / visita 37.10%, goles 1.350 vs 1.351). No hay ventaja de localía: el modelo es neutral por diseño (correcto para un Mundial).
 - C1 depende de que `drafted_team_players` esté poblado, lo que requiere que el pool de draft use IDs de DB (UUID) y no del JSON (`slug:slug`). Ver M5 — conviene unificar la fuente del pool.
 
 ### 2026-06-09 — C3 resuelto

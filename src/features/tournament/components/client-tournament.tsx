@@ -121,7 +121,7 @@ function MatchRow({ m, dim }: { m: CampMatch; dim?: boolean }) {
   const tone = m.result === 'W' ? 'text-grass' : m.result === 'L' ? 'text-vermillion' : 'text-ink'
   const mark = m.result === 'W' ? '✓' : m.result === 'L' ? '✗' : '–'
   return (
-    <div className={`flex items-center gap-4 border-b-2 border-ink/10 bg-bone px-5 py-4 ${dim ? 'opacity-0' : ''}`}>
+    <div className={`flex animate-rowIn items-center gap-4 border-b-2 border-ink/10 bg-bone px-5 py-4 ${dim ? 'opacity-0' : ''}`}>
       <div className="w-20 shrink-0">
         <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink2">{m.stage}</p>
       </div>
@@ -135,7 +135,7 @@ function MatchRow({ m, dim }: { m: CampMatch; dim?: boolean }) {
         </p>
       </div>
       <div className="flex shrink-0 items-center gap-2">
-        <span className={`font-slab text-2xl tracking-wide ${tone}`}>
+        <span className={`animate-popScore font-slab text-2xl tracking-wide ${tone}`} style={{ animationDelay: '0.12s' }}>
           {m.us}<span className="mx-0.5 text-ink2">–</span>{m.them}
         </span>
         {m.pen && <span className="font-mono text-[10px] uppercase text-ink2">{m.pen} pen</span>}
@@ -177,7 +177,7 @@ function SummaryCard({ tournament, matches }: { tournament: TournamentOverview; 
   }
 
   return (
-    <div className="space-y-5">
+    <div className="animate-fadeUp space-y-5">
       <div className="overflow-hidden rounded-2xl border-2 border-ink bg-ink p-7 text-paper shadow-hardsm">
         {isChampion && (
           <p className="mb-3 font-mono text-[11px] uppercase tracking-[0.3em] text-gold">🏆 Campeón del mundo</p>
@@ -237,7 +237,7 @@ function Metric({ value, label }: { value: number; label: string }) {
 function WorldDetail({ tournament }: { tournament: TournamentOverview }) {
   const humanId = tournament.humanEntryId
   return (
-    <details className="group rounded-2xl border-2 border-ink bg-bone shadow-hardsm">
+    <details className="group animate-fadeUp rounded-2xl border-2 border-ink bg-bone shadow-hardsm">
       <summary className="cursor-pointer list-none px-5 py-4 font-slab text-lg uppercase tracking-wide text-ink">
         El resto del Mundial <span className="float-right font-mono text-sm text-ink2 group-open:rotate-180">▾</span>
       </summary>
@@ -332,7 +332,7 @@ export function ClientTournament({ tournament }: { tournament: TournamentOvervie
   // -------- Preview: la campaña no arrancó --------
   if (revealed === 0) {
     return (
-      <div className="space-y-6">
+      <div className="animate-fadeUp space-y-6">
         {userGroup ? (
           <div className="rounded-2xl border-2 border-ink bg-bone p-6 shadow-hardsm">
             <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-ink2">Tu grupo {userGroup.code}</p>

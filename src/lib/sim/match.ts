@@ -116,7 +116,12 @@ function simulatePenaltyShootout(home: TeamStats, away: TeamStats, rng: () => nu
 }
 
 const BASE_GOALS = 1.35
-const ATTACK_EXPONENT = 1.25
+// Sensibilidad del resultado a la diferencia de nivel entre equipos. Las medias
+// están comprimidas (~70-90), así que el cociente entre dos equipos queda cerca
+// de 1; este exponente expande esa diferencia. Con 2.5 el favorito gana lo
+// esperado según la brecha de media (parejos: sorpresa habitual; brecha grande:
+// sorpresa rara). Un valor bajo (ej. 1.25) hacía que las medias casi no pesaran.
+const ATTACK_EXPONENT = 2.5
 
 // Fuerza ofensiva de un equipo: el ataque manda, el mediocampo alimenta.
 function attackingStrength(team: TeamStats): number {

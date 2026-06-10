@@ -1,12 +1,12 @@
 import Link from 'next/link'
 
-import { getOrCreateSessionToken } from '@/lib/draft/session-token'
+import { getSessionTokenReadOnly } from '@/lib/draft/session-token'
 import { getSingleplayerTournamentOverview } from '@/lib/tournaments/overview'
 import { ClientTournament } from '@/features/tournament/components/client-tournament'
 
 export default async function TournamentPage() {
-  const sessionToken = await getOrCreateSessionToken()
-  const tournament = await getSingleplayerTournamentOverview(sessionToken)
+  const sessionToken = await getSessionTokenReadOnly()
+  const tournament = sessionToken ? await getSingleplayerTournamentOverview(sessionToken) : null
 
   return (
     <main className="min-h-screen bg-paper text-ink">
