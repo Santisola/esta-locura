@@ -37,6 +37,37 @@ const config: Config = {
         mono: ['var(--font-mono)'],
         slab: ['var(--font-slab)'],
       },
+      keyframes: {
+        rowIn: {
+          '0%': { opacity: '0', transform: 'translateY(14px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        fadeUp: {
+          '0%': { opacity: '0', transform: 'translateY(18px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        slideIn: {
+          '0%': { opacity: '0', transform: 'translateX(-14px)' },
+          '100%': { opacity: '1', transform: 'translateX(0)' },
+        },
+        pop: {
+          '0%': { opacity: '0', transform: 'scale(0.4)' },
+          '60%': { opacity: '1', transform: 'scale(1.15)' },
+          '100%': { transform: 'scale(1)' },
+        },
+        popScore: {
+          '0%': { transform: 'scale(0.6)', opacity: '0' },
+          '55%': { transform: 'scale(1.25)' },
+          '100%': { transform: 'scale(1)', opacity: '1' },
+        },
+      },
+      animation: {
+        rowIn: 'rowIn 0.45s cubic-bezier(0.2,0.8,0.2,1) both',
+        fadeUp: 'fadeUp 0.5s cubic-bezier(0.2,0.8,0.2,1) both',
+        slideIn: 'slideIn 0.35s ease-out both',
+        pop: 'pop 0.42s cubic-bezier(0.2,0.9,0.3,1.3) both',
+        popScore: 'popScore 0.5s cubic-bezier(0.2,0.9,0.3,1.3) both',
+      },
       backgroundImage: {
         pitch: 'radial-gradient(circle at top, rgba(125, 211, 252, 0.12), transparent 42%), linear-gradient(135deg, rgba(239, 125, 87, 0.16), transparent 45%)',
       },

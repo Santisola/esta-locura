@@ -457,11 +457,11 @@ function ActionButton({ onClick, label, disabled, dice, arrow }: {
     <button
       onClick={onClick}
       disabled={disabled}
-      className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-ink bg-gradient-to-r from-celeste to-violeta px-5 py-4 font-slab text-lg uppercase tracking-wide text-white shadow-hardsm transition hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none disabled:cursor-not-allowed disabled:opacity-40"
+      className="group flex w-full items-center justify-center gap-2 rounded-xl border-2 border-ink bg-gradient-to-r from-celeste to-violeta px-5 py-4 font-slab text-lg uppercase tracking-wide text-white shadow-hardsm transition hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
     >
       <span>{label}</span>
-      {dice && <span className="text-xl">🎲</span>}
-      {arrow && <span className="text-xl">→</span>}
+      {dice && <span className="text-xl transition-transform duration-300 group-hover:rotate-[30deg] group-hover:scale-110">🎲</span>}
+      {arrow && <span className="text-xl transition-transform group-hover:translate-x-1">→</span>}
     </button>
   )
 }
@@ -527,7 +527,7 @@ function CountryPicker({ country, players, rerollsLeft, difficulty, onAssign, on
   canReroll: boolean
 }) {
   return (
-    <div className="rounded-2xl border-2 border-ink bg-bone p-4 shadow-hardsm">
+    <div className="animate-slideIn rounded-2xl border-2 border-ink bg-bone p-4 shadow-hardsm">
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-vermillion">Selección del momento</p>
@@ -559,7 +559,7 @@ function CountryPicker({ country, players, rerollsLeft, difficulty, onAssign, on
                   <button
                     key={sc}
                     onClick={() => onAssign(p.id, sc)}
-                    className="rounded-md bg-ink px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.1em] text-paper transition hover:bg-vermillion"
+                    className="rounded-md bg-ink px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.1em] text-paper transition hover:bg-vermillion active:scale-90"
                   >
                     {posLabel(sc)}
                   </button>
@@ -602,15 +602,20 @@ function Pitch({ nodes, picks, playersById, revealRatings }: {
             className="absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center"
             style={{ left: `${node.x}%`, top: `${node.y}%` }}
           >
-            <div className={`flex h-12 w-12 items-center justify-center rounded-full text-center ${
-              player ? 'bg-bone text-ink shadow-hardsm' : 'border-2 border-dashed border-white/60 text-white/80'
-            }`}>
-              <span className={`font-slab leading-none ${player ? 'text-[11px]' : 'text-[10px]'}`}>{posLabel(node.code)}</span>
-            </div>
-            {player && (
-              <div className="mt-1 flex items-center gap-1 rounded bg-ink/85 px-1.5 py-0.5">
-                <span className="max-w-[68px] truncate font-mono text-[9px] uppercase tracking-wide text-paper">{surname(player.name)}</span>
-                {revealRatings && <span className="font-slab text-[10px] text-gold">{player.ovr}</span>}
+            {player ? (
+              // key distinto fuerza el montaje al asignar → dispara el "pop"
+              <div key="filled" className="flex animate-pop flex-col items-center">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-bone text-ink shadow-hardsm">
+                  <span className="font-slab text-[11px] leading-none">{posLabel(node.code)}</span>
+                </div>
+                <div className="mt-1 flex items-center gap-1 rounded bg-ink/85 px-1.5 py-0.5">
+                  <span className="max-w-[68px] truncate font-mono text-[9px] uppercase tracking-wide text-paper">{surname(player.name)}</span>
+                  {revealRatings && <span className="font-slab text-[10px] text-gold">{player.ovr}</span>}
+                </div>
+              </div>
+            ) : (
+              <div key="empty" className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-dashed border-white/60 text-white/80">
+                <span className="font-slab text-[10px] leading-none">{posLabel(node.code)}</span>
               </div>
             )}
           </div>

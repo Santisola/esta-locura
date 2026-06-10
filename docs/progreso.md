@@ -58,6 +58,20 @@ Rediseño visual completo al estilo editorial-deportivo "7-0" (crema, tipografí
 - **Verificado en preview** (datos reales): home, draft (con picker de Marruecos real + asignación), campaña completa (feed con goleadores reales + card resumen "4-2") renderizan correctamente; `tsc` sin errores.
 - **Pendiente del rediseño**: aún no se tocó el body global (cada página setea su propio fondo, así que conviven sin romperse). Posibles mejoras: selector de "Estilo" (Defensivo/Equilibrado/Ofensivo), banderas/códigos de país, swap de jugadores en la cancha.
 
+### Animaciones de interacción + fix cookie en páginas (2026-06-10)
+- **Animaciones** (sin dependencias, keyframes Tailwind en `tailwind.config.ts` + guard `prefers-reduced-motion` en `globals.css`):
+  - Campaña: cada partido revelado entra con `rowIn` (slide-up) y el marcador "salta" con `popScore`; card resumen, detalle y preview con `fadeUp`.
+  - Draft: la ficha del jugador aparece en la cancha con `pop` al asignarlo (key distinto fuerza el montaje); el picker de país entra con `slideIn`; botones de asignar con `active:scale-90`; el dado del botón Tirar gira en hover; CTAs con `active:scale`.
+  - Verificado: los 5 keyframes + utilidades `animate-*` están en el CSS compilado.
+- **Bug arreglado (pre-existente)**: `/tournament` y `/historial` daban 500 al entrar sin cookie previa, porque el Server Component intentaba **crear** la cookie (Next no permite escribir cookies en render). Nuevo `getSessionTokenReadOnly()` (solo lectura) usado por esas páginas; la cookie se crea desde los Route Handlers. Las 3 páginas ahora dan 200.
+
+### Rediseño de la card del Mundial (2026-06-10)
+- La imagen OG (`/tournament/[id]/card`) pasó de un formato simple (landscape, solo resultado) a una **ficha vertical (1080×1350)** con identidad albiceleste (gradiente índigo→violeta, acentos celestes, logo "ESTA LOCURA").
+- Ahora muestra: **plantel completo** del equipo draft (11 jugadores con posición en español + rating, ordenados por línea) y los **resultados de los partidos** de la campaña (etapa, rival, marcador con color, punto verde/rojo/gris, penales). Más media del equipo, GF/GC y goleador.
+- `card-data.ts` extendido: devuelve `squad[]`, `matches[]` y `ovr` además de lo anterior.
+- Detalle Satori: los ✓/✗ no existen en la fuente por defecto → se usan puntos de color (divs) para el resultado.
+- Verificado renderizando el PNG real (plantel + 4 partidos + resumen correctos). `tsc` sin errores.
+
 ### Tuning del motor: demasiadas sorpresas (2026-06-10)
 - **Problema**: las medias casi no influían en el resultado → equipos débiles salían campeones, favoritos claros caían seguido. Medido: con el exponente viejo (1.25), un gap de 20 de media daba al favorito solo **58%** de victoria; gap 16 → 53% (casi moneda al aire).
 - **Causa**: las medias están comprimidas (~70-90), así que el cociente ataque/defensa entre dos equipos queda cerca de 1; el exponente `1.25` no expandía esa diferencia.

@@ -50,3 +50,14 @@ a {
 ::selection {
   background: rgba(239, 125, 87, 0.35);
 }
+
+/* Respeta a quien prefiere menos movimiento: desactiva las animaciones. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
