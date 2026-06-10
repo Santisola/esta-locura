@@ -2,313 +2,419 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 import type { TournamentOverview } from '@/lib/tournaments/overview'
 
-const ROUND_LABELS: Record<string, string> = {
-  ROUND_OF_32: 'Dieciseisavos de final',
-  ROUND_OF_16: 'Octavos de final',
-  QUARTER_FINAL: 'Cuartos de final',
-  SEMI_FINAL: 'Semifinal',
+const KO_ORDER: Record<string, number> = {
+  GROUP: 0,
+  ROUND_OF_32: 1,
+  ROUND_OF_16: 2,
+  QUARTER_FINAL: 3,
+  SEMI_FINAL: 4,
+  FINAL: 5,
+}
+
+const STAGE_LABEL: Record<string, string> = {
+  GROUP: 'Grupos',
+  ROUND_OF_32: 'Dieciseisavos',
+  ROUND_OF_16: 'Octavos',
+  QUARTER_FINAL: 'Cuartos',
+  SEMI_FINAL: 'Semis',
   FINAL: 'Final',
 }
 
-function ScoreBlock({ home, away, homePenalties, awayPenalties, wentToPenalties }: {
-  home: number; away: number; homePenalties?: number | null; awayPenalties?: number | null; wentToPenalties?: boolean
-}) {
-  const isDraw = home === away
+async function readJsonSafe<T>(res: Response): Promise<T | null> {
+  const text = await res.text()
+  if (!text) return null
+  try {
+    return JSON.parse(text) as T
+  } catch {
+    return null
+  }
+}
+
+type CampMatch = {
+  id: string
+  stage: string
+  opponent: string
+  us: number
+  them: number
+  result: 'W' | 'D' | 'L'
+  wentToPenalties: boolean
+  pen: string | null
+  scorers: string[]
+  conceded: string[]
+}
+
+function buildHumanMatches(tournament: TournamentOverview): CampMatch[] {
+  const id = tournament.humanEntryId
+  if (!id) return []
+
+  const list: CampMatch[] = []
+
+  const userGroup = tournament.groups.find((g) => g.entries.some((e) => e.id === id))
+  const groupFixtures = (userGroup?.fixtures ?? [])
+    .filter((m) => m.homeEntryId === id || m.awayEntryId === id)
+    .sort((a, b) => a.stageOrder - b.stageOrder)
+
+  const toMatch = (m: {
+    id: string
+    round: string
+    homeEntryId: string
+    awayEntryId: string
+    homeName: string
+    awayName: string
+    homeScore: number
+    awayScore: number
+    homePenalties?: number | null
+    awayPenalties?: number | null
+    wentToPenalties?: boolean
+    winnerId?: string | null
+    winnerEntryId?: string | null
+    events: Array<{ type: string; side: string; playerName: string | null }>
+  }): CampMatch => {
+    const humanIsHome = m.homeEntryId === id
+    const us = humanIsHome ? m.homeScore : m.awayScore
+    const them = humanIsHome ? m.awayScore : m.homeScore
+    const oursSide = humanIsHome ? 'HOME' : 'AWAY'
+    const goals = m.events.filter((e) => e.type === 'GOAL' || e.type === 'PENALTY_GOAL')
+    const scorers = goals.filter((e) => e.side === oursSide).map((e) => e.playerName).filter((n): n is string => Boolean(n))
+    const conceded = goals.filter((e) => e.side !== oursSide && e.side !== 'NEUTRAL').map((e) => e.playerName).filter((n): n is string => Boolean(n))
+    const winner = m.winnerId ?? m.winnerEntryId ?? null
+    let result: 'W' | 'D' | 'L'
+    if (winner) result = winner === id ? 'W' : 'L'
+    else result = us > them ? 'W' : us === them ? 'D' : 'L'
+    const pen =
+      m.wentToPenalties && m.homePenalties != null && m.awayPenalties != null
+        ? `${humanIsHome ? m.homePenalties : m.awayPenalties}-${humanIsHome ? m.awayPenalties : m.homePenalties}`
+        : null
+    return {
+      id: m.id,
+      stage: STAGE_LABEL[m.round] ?? m.round,
+      opponent: humanIsHome ? m.awayName : m.homeName,
+      us,
+      them,
+      result,
+      wentToPenalties: Boolean(m.wentToPenalties),
+      pen,
+      scorers,
+      conceded,
+    }
+  }
+
+  for (const f of groupFixtures) list.push(toMatch(f))
+
+  const koRounds = ['ROUND_OF_32', 'ROUND_OF_16', 'QUARTER_FINAL', 'SEMI_FINAL', 'FINAL']
+  const koHuman = tournament.knockoutMatches
+    .filter((m) => m.homeEntryId === id || m.awayEntryId === id)
+    .sort((a, b) => (KO_ORDER[a.round] ?? 0) - (KO_ORDER[b.round] ?? 0))
+  for (const m of koHuman) {
+    if (koRounds.includes(m.round)) list.push(toMatch(m))
+  }
+
+  return list
+}
+
+// ---------------------------------------------------------------------------
+function MatchRow({ m, dim }: { m: CampMatch; dim?: boolean }) {
+  const tone = m.result === 'W' ? 'text-grass' : m.result === 'L' ? 'text-vermillion' : 'text-ink'
+  const mark = m.result === 'W' ? '✓' : m.result === 'L' ? '✗' : '–'
   return (
-    <span className="inline-flex items-center gap-1.5 font-mono tabular-nums">
-      <span className={`text-2xl font-extrabold ${home > away ? 'text-sand' : isDraw && home > 0 ? 'text-sand' : home === 0 && away === 0 ? 'text-sand/50' : 'text-sand/50'}`}>{home}</span>
-      <span className="text-lg text-sand/30">–</span>
-      <span className={`text-2xl font-extrabold ${away > home ? 'text-sand' : isDraw && away > 0 ? 'text-sand' : away === 0 && home === 0 ? 'text-sand/50' : 'text-sand/50'}`}>{away}</span>
-      {wentToPenalties && homePenalties != null && awayPenalties != null && (
-        <span className="ml-1 text-xs text-sand/45">({homePenalties}–{awayPenalties}) p</span>
-      )}
-    </span>
+    <div className={`flex items-center gap-4 border-b-2 border-ink/10 bg-bone px-5 py-4 ${dim ? 'opacity-0' : ''}`}>
+      <div className="w-20 shrink-0">
+        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink2">{m.stage}</p>
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="truncate font-slab text-lg leading-tight tracking-wide text-ink">{m.opponent}</p>
+        <p className="mt-0.5 truncate text-xs text-ink2">
+          {m.scorers.length > 0 && <><span className="font-mono uppercase tracking-wide text-ink2/70">Goles </span>{m.scorers.join(', ')}</>}
+          {m.scorers.length > 0 && m.conceded.length > 0 && ' · '}
+          {m.conceded.length > 0 && <><span className="font-mono uppercase tracking-wide text-ink2/70">Recibió </span>{m.conceded.join(', ')}</>}
+          {m.scorers.length === 0 && m.conceded.length === 0 && 'Sin goles'}
+        </p>
+      </div>
+      <div className="flex shrink-0 items-center gap-2">
+        <span className={`font-slab text-2xl tracking-wide ${tone}`}>
+          {m.us}<span className="mx-0.5 text-ink2">–</span>{m.them}
+        </span>
+        {m.pen && <span className="font-mono text-[10px] uppercase text-ink2">{m.pen} pen</span>}
+        <span className={`w-4 text-center text-lg ${tone}`}>{mark}</span>
+      </div>
+    </div>
   )
 }
 
-function SimulateButton() {
-  const router = useRouter()
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+function SummaryCard({ tournament, matches }: { tournament: TournamentOverview; matches: CampMatch[] }) {
+  const [copied, setCopied] = useState(false)
+  const wins = matches.filter((m) => m.result === 'W').length
+  const losses = matches.filter((m) => m.result === 'L').length
+  const gf = matches.reduce((s, m) => s + m.us, 0)
+  const gc = matches.reduce((s, m) => s + m.them, 0)
+  const isChampion = tournament.championEntryId === tournament.humanEntryId
+  const cardUrl = `/tournament/${tournament.tournamentId}/card`
 
-  async function handle() {
-    setLoading(true)
-    setError(null)
+  async function share() {
+    const text = isChampion
+      ? '¡Salí campeón del mundo en Esta Locura!'
+      : `Mi campaña en Esta Locura: ${wins}-${losses}.`
+    const url = `${window.location.origin}${cardUrl}`
     try {
-      const res = await fetch('/api/tournaments/simulate', { method: 'POST' })
-      const data = await res.json()
-      if (!res.ok) { setError(data.error ?? 'Error.'); setLoading(false); return }
-      router.refresh()
-    } catch { setError('Error de conexion.'); setLoading(false) }
+      if (typeof navigator !== 'undefined' && navigator.share) {
+        await navigator.share({ title: 'Esta Locura', text, url })
+        return
+      }
+    } catch {
+      return
+    }
+    try {
+      await navigator.clipboard.writeText(`${text} ${url}`)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2500)
+    } catch {
+      /* ignore */
+    }
   }
 
   return (
-    <div className="text-center">
-      <div className="mx-auto max-w-lg space-y-4">
-        <p className="text-lg font-semibold">Todo listo para el pitido inicial</p>
-        <p className="text-sm leading-6 text-sand/60">
-          Los 48 equipos estan en sus grupos. Cuando quieras, el simulador resuelve cada partido
-          con los datos reales de tu armado. No hay marcha atras: esto es lo que construiste.
-        </p>
-      </div>
-      <button onClick={handle} disabled={loading}
-        className="mt-6 rounded-full bg-gradient-to-r from-cyan to-emerald px-10 py-4 font-mono text-sm font-semibold uppercase tracking-[0.28em] text-night transition hover:scale-[1.02] disabled:opacity-50">
-        {loading ? 'Simulando...' : 'Pitar el inicio'}
-      </button>
-      {error && <p className="mt-3 text-sm text-red/80">{error}</p>}
-    </div>
-  )
-}
-
-function MatchCard({ homeName, awayName, homeScore, awayScore, homePenalties, awayPenalties, wentToPenalties, isHuman, label }: {
-  homeName: string; awayName: string; homeScore: number; awayScore: number
-  homePenalties?: number | null; awayPenalties?: number | null; wentToPenalties?: boolean
-  isHuman?: boolean; label?: string
-}) {
-  return (
-    <div className={`rounded-2xl border px-5 py-4 transition ${
-      isHuman
-        ? 'border-cyan/40 bg-cyan/8 shadow-[0_0_20px_-8px_rgba(0,200,200,0.15)]'
-        : 'border-white/10 bg-white/5'
-    }`}>
-      {label && <p className="mb-2 font-mono text-[11px] uppercase tracking-[0.2em] text-sand/40">{label}</p>}
-      <div className="flex items-center justify-between gap-4">
-        <div className={`flex-1 min-w-0 ${isHuman ? 'text-left' : ''}`}>
-          <p className={`truncate text-base ${homeScore > awayScore ? 'font-bold text-sand' : 'text-sand/60'}`}>{homeName}</p>
-        </div>
-        <ScoreBlock home={homeScore} away={awayScore} homePenalties={homePenalties} awayPenalties={awayPenalties} wentToPenalties={wentToPenalties} />
-        <div className={`flex-1 min-w-0 ${isHuman ? 'text-right' : 'text-right'}`}>
-          <p className={`truncate text-base ${awayScore > homeScore ? 'font-bold text-sand' : 'text-sand/60'}`}>{awayName}</p>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function GroupStandingsTable({ standings, humanEntryId }: {
-  standings: TournamentOverview['groups'][number]['standings']
-  humanEntryId: string | null
-}) {
-  const advancers = standings.filter((s) => s.rank <= 2)
-
-  return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-left text-sm">
-        <thead>
-          <tr className="border-b border-white/10 font-mono text-xs uppercase tracking-[0.15em] text-sand/40">
-            <th className="px-2 py-2 w-8">#</th>
-            <th className="px-2 py-2">Equipo</th>
-            <th className="px-2 py-2 text-center w-8">PJ</th>
-            <th className="px-2 py-2 text-center w-8">G</th>
-            <th className="px-2 py-2 text-center w-8">E</th>
-            <th className="px-2 py-2 text-center w-8">P</th>
-            <th className="px-2 py-2 text-center w-8">GF</th>
-            <th className="px-2 py-2 text-center w-8">GC</th>
-            <th className="px-2 py-2 text-center w-10">DG</th>
-            <th className="px-2 py-2 text-right w-10 font-bold">Pts</th>
-          </tr>
-        </thead>
-        <tbody>
-          {standings.map((s) => (
-            <tr key={s.entryId}
-              className={`border-b border-white/5 transition ${
-                s.entryId === humanEntryId ? 'bg-cyan/8' : advancers.find((a) => a.entryId === s.entryId) ? 'bg-emerald/5' : ''
-              }`}>
-              <td className="px-2 py-2.5 font-mono text-xs text-sand/40">{s.rank}</td>
-              <td className="px-2 py-2.5 font-medium">
-                {s.name}
-                {s.entryId === humanEntryId && <span className="ml-2 text-xs text-cyan/80">Tu equipo</span>}
-                {s.entryId !== humanEntryId && advancers.find((a) => a.entryId === s.entryId) && <span className="ml-2 text-xs text-emerald/60">Clasificado</span>}
-              </td>
-              <td className="px-2 py-2.5 text-center font-mono text-xs">{s.played}</td>
-              <td className="px-2 py-2.5 text-center font-mono text-xs">{s.wins}</td>
-              <td className="px-2 py-2.5 text-center font-mono text-xs">{s.draws}</td>
-              <td className="px-2 py-2.5 text-center font-mono text-xs">{s.losses}</td>
-              <td className="px-2 py-2.5 text-center font-mono text-xs">{s.goalsFor}</td>
-              <td className="px-2 py-2.5 text-center font-mono text-xs">{s.goalsAgainst}</td>
-              <td className={`px-2 py-2.5 text-center font-mono text-xs ${
-                s.goalDifference > 0 ? 'text-emerald' : s.goalDifference < 0 ? 'text-red' : ''
-              }`}>{s.goalDifference > 0 ? `+${s.goalDifference}` : s.goalDifference}</td>
-              <td className="px-2 py-2.5 text-right font-mono text-sm font-bold">{s.points}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  )
-}
-
-function HumanGroupMatches({ fixtures, humanEntryId }: {
-  fixtures: TournamentOverview['groups'][number]['fixtures']
-  humanEntryId: string
-}) {
-  const humanMatches = fixtures.filter((m) => m.homeEntryId === humanEntryId || m.awayEntryId === humanEntryId)
-
-  const finished = humanMatches.filter((m) => m.status === 'FINISHED')
-  if (finished.length === 0) return null
-
-  return (
-    <div className="space-y-3">
-      <p className="font-mono text-xs uppercase tracking-[0.22em] text-cyan/85">Tus resultados</p>
-      {finished.map((m, i) => (
-        <MatchCard key={m.id}
-          homeName={m.homeName} awayName={m.awayName}
-          homeScore={m.homeScore} awayScore={m.awayScore}
-          homePenalties={m.homePenalties} awayPenalties={m.awayPenalties}
-          wentToPenalties={m.wentToPenalties}
-          isHuman
-          label={`Partido ${i + 1}`}
-        />
-      ))}
-    </div>
-  )
-}
-
-function HumanKnockoutMatches({ knockoutMatches, humanEntryId }: {
-  knockoutMatches: TournamentOverview['knockoutMatches']
-  humanEntryId: string
-}) {
-  const rounds = ['ROUND_OF_32', 'ROUND_OF_16', 'QUARTER_FINAL', 'SEMI_FINAL', 'FINAL'] as const
-
-  return (
-    <div className="mt-10 space-y-10">
-      {rounds.map((round) => {
-        const roundMatches = knockoutMatches.filter((m) => m.round === round)
-        if (roundMatches.length === 0) return null
-
-        const humanMatch = roundMatches.find((m) => m.homeEntryId === humanEntryId || m.awayEntryId === humanEntryId)
-
-        const label = ROUND_LABELS[round] ?? round
-
-        return (
-          <div key={round}>
-            <div className="mb-4 flex items-center gap-3">
-              <span className="h-px flex-1 bg-white/10" />
-              <span className="font-mono text-xs uppercase tracking-[0.28em] text-ember/85">{label}</span>
-              <span className="h-px flex-1 bg-white/10" />
-            </div>
-
-            {humanMatch && (
-              <div className="mb-4">
-                <p className="mb-2 font-mono text-[11px] uppercase tracking-[0.2em] text-cyan/70">Tu cruce</p>
-                <MatchCard
-                  homeName={humanMatch.homeName} awayName={humanMatch.awayName}
-                  homeScore={humanMatch.homeScore} awayScore={humanMatch.awayScore}
-                  homePenalties={humanMatch.homePenalties} awayPenalties={humanMatch.awayPenalties}
-                  wentToPenalties={humanMatch.wentToPenalties}
-                  isHuman
-                />
-              </div>
-            )}
-
-            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-              {roundMatches
-                .filter((m) => !(humanMatch && m.id === humanMatch.id))
-                .map((m) => (
-                  <MatchCard key={m.id}
-                    homeName={m.homeName} awayName={m.awayName}
-                    homeScore={m.homeScore} awayScore={m.awayScore}
-                    homePenalties={m.homePenalties} awayPenalties={m.awayPenalties}
-                    wentToPenalties={m.wentToPenalties}
-                  />
-                ))}
-            </div>
+    <div className="space-y-5">
+      <div className="overflow-hidden rounded-2xl border-2 border-ink bg-ink p-7 text-paper shadow-hardsm">
+        {isChampion && (
+          <p className="mb-3 font-mono text-[11px] uppercase tracking-[0.3em] text-gold">🏆 Campeón del mundo</p>
+        )}
+        <div className="flex items-center gap-7">
+          <p className="font-slab text-7xl leading-none">
+            {wins}<span className="text-vermillion">-</span>{losses}
+          </p>
+          <div className="grid grid-cols-3 gap-x-7 gap-y-1">
+            <Metric value={gf} label="Goles a favor" />
+            <Metric value={gc} label="En contra" />
+            <Metric value={wins} label="Victorias" />
           </div>
-        )
-      })}
+        </div>
+        {tournament.topScorer && (
+          <p className="mt-4 border-t border-white/10 pt-3 font-mono text-[11px] uppercase tracking-[0.16em] text-paper/60">
+            Goleador del torneo · <span className="text-paper">{tournament.topScorer.name}</span> ({tournament.topScorer.goals})
+          </p>
+        )}
+      </div>
+
+      <div className="flex flex-wrap items-center gap-3">
+        <Link
+          href="/draft"
+          className="rounded-xl border-2 border-ink bg-bone px-5 py-3 font-mono text-xs uppercase tracking-[0.2em] text-ink shadow-hardsm transition hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none"
+        >
+          ↻ Repetir
+        </Link>
+        <button
+          onClick={share}
+          className="rounded-xl bg-vermillion px-6 py-3 font-slab text-base uppercase tracking-wide text-bone shadow-hardsm transition hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none"
+        >
+          {copied ? '¡Link copiado!' : 'Compartir →'}
+        </button>
+        <a
+          href={cardUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="rounded-xl border-2 border-ink bg-bone px-5 py-3 font-mono text-xs uppercase tracking-[0.2em] text-ink shadow-hardsm transition hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none"
+        >
+          Ver mi card
+        </a>
+      </div>
     </div>
   )
 }
 
-function ChampionSection({ name }: { name: string }) {
+function Metric({ value, label }: { value: number; label: string }) {
   return (
-    <div className="mt-10 overflow-hidden rounded-[2rem] border border-amber/30 bg-gradient-to-br from-amber/10 via-night to-amber/5 p-10 text-center shadow-[0_0_60px_-20px_rgba(255,200,50,0.15)]">
-      <p className="font-mono text-xs uppercase tracking-[0.4em] text-amber/70">Campeon del mundo</p>
-      <h2 className="mt-4 text-5xl font-bold tracking-tight text-amber">{name}</h2>
-      <p className="mt-4 text-base text-sand/60">Esta locura quedo en la historia.</p>
+    <div>
+      <p className="font-slab text-2xl leading-none text-gold">{value}</p>
+      <p className="mt-1 font-mono text-[9px] uppercase tracking-[0.14em] text-paper/55">{label}</p>
     </div>
   )
 }
 
+function WorldDetail({ tournament }: { tournament: TournamentOverview }) {
+  const humanId = tournament.humanEntryId
+  return (
+    <details className="group rounded-2xl border-2 border-ink bg-bone shadow-hardsm">
+      <summary className="cursor-pointer list-none px-5 py-4 font-slab text-lg uppercase tracking-wide text-ink">
+        El resto del Mundial <span className="float-right font-mono text-sm text-ink2 group-open:rotate-180">▾</span>
+      </summary>
+      <div className="space-y-6 border-t-2 border-ink/10 px-5 py-5">
+        <div className="grid gap-4 sm:grid-cols-2">
+          {tournament.groups.map((g) => (
+            <div key={g.code} className="rounded-xl border border-line bg-paper2 p-3">
+              <p className="mb-2 font-slab text-sm uppercase tracking-wide text-ink">Grupo {g.code}</p>
+              <ul className="space-y-1">
+                {g.standings.map((s) => (
+                  <li
+                    key={s.entryId}
+                    className={`flex items-center justify-between text-xs ${s.entryId === humanId ? 'font-bold text-vermillion' : s.rank <= 2 ? 'text-ink' : 'text-ink2'}`}
+                  >
+                    <span className="truncate">{s.rank}. {s.name}</span>
+                    <span className="ml-2 shrink-0 font-mono">{s.points} pts</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </div>
+    </details>
+  )
+}
+
+// ---------------------------------------------------------------------------
 export function ClientTournament({ tournament }: { tournament: TournamentOverview }) {
+  const router = useRouter()
   const humanId = tournament.humanEntryId
 
+  const userGroup = useMemo(
+    () => tournament.groups.find((g) => g.entries.some((e) => e.id === humanId)) ?? null,
+    [tournament.groups, humanId],
+  )
+  const humanMatches = useMemo(() => buildHumanMatches(tournament), [tournament])
+
+  const storageKey = `esta-locura.campaign.${tournament.tournamentId}`
+  const [revealed, setRevealed] = useState(0)
+  const [hydrated, setHydrated] = useState(false)
+  const [starting, setStarting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const feedEndRef = useRef<HTMLDivElement | null>(null)
+
+  useEffect(() => {
+    if (hydrated) return
+    const saved = window.localStorage.getItem(storageKey)
+    setRevealed(saved ? Math.min(Math.max(Number(saved) || 0, 0), humanMatches.length) : 0)
+    setHydrated(true)
+  }, [hydrated, storageKey, humanMatches.length])
+
+  useEffect(() => {
+    if (!hydrated) return
+    window.localStorage.setItem(storageKey, String(revealed))
+  }, [revealed, hydrated, storageKey])
+
+  useEffect(() => {
+    if (revealed > 0) feedEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
+  }, [revealed])
+
+  async function start() {
+    if (tournament.isSimulated) {
+      window.localStorage.setItem(storageKey, '1')
+      setRevealed(1)
+      return
+    }
+    setStarting(true)
+    setError(null)
+    try {
+      const res = await fetch('/api/tournaments/simulate', { method: 'POST' })
+      const data = await readJsonSafe<{ error?: string }>(res)
+      if (!res.ok || !data) {
+        setError(data?.error ?? `No se pudo iniciar (error ${res.status}).`)
+        setStarting(false)
+        return
+      }
+      window.localStorage.setItem(storageKey, '1')
+      setRevealed(1)
+      setHydrated(true)
+      router.refresh()
+    } catch {
+      setError('Error de conexión.')
+      setStarting(false)
+    }
+  }
+
+  if (!hydrated) {
+    return <div className="py-16 text-center font-mono text-sm uppercase tracking-[0.3em] text-ink2">Cargando tu campaña...</div>
+  }
+
+  // -------- Preview: la campaña no arrancó --------
+  if (revealed === 0) {
+    return (
+      <div className="space-y-6">
+        {userGroup ? (
+          <div className="rounded-2xl border-2 border-ink bg-bone p-6 shadow-hardsm">
+            <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-ink2">Tu grupo {userGroup.code}</p>
+            <ul className="mt-3 grid gap-2 sm:grid-cols-2">
+              {userGroup.entries.map((e) => (
+                <li
+                  key={e.id}
+                  className={`flex items-center justify-between rounded-lg border-2 px-4 py-3 ${e.id === humanId ? 'border-ink bg-ink text-paper' : 'border-line bg-paper2 text-ink'}`}
+                >
+                  <span className="font-slab tracking-wide">{e.name}</span>
+                  <span className="font-mono text-xs opacity-70">OVR {e.ovr}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : (
+          <p className="text-sm text-ink2">Terminá tu draft para ver tu grupo.</p>
+        )}
+
+        <div className="text-center">
+          <button
+            onClick={start}
+            disabled={starting}
+            className="rounded-2xl border-2 border-ink bg-gradient-to-r from-celeste to-violeta px-12 py-5 font-slab text-2xl uppercase tracking-wide text-white shadow-hard transition hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none disabled:opacity-50"
+          >
+            {starting ? 'Preparando...' : 'Iniciar el Mundial →'}
+          </button>
+          {error && <p className="mt-3 font-mono text-sm text-vermillion">{error}</p>}
+        </div>
+      </div>
+    )
+  }
+
+  // -------- Reproducción de la campaña --------
+  const allRevealed = revealed >= humanMatches.length
+  const visible = humanMatches.slice(0, revealed)
+
   return (
-    <>
-      {tournament.championName && <ChampionSection name={tournament.championName} />}
+    <div className="space-y-6">
+      <div className="flex items-center justify-end gap-2">
+        <button
+          onClick={() => setRevealed((r) => Math.min(r + 1, humanMatches.length))}
+          disabled={allRevealed}
+          className={`rounded-lg border-2 px-4 py-2 font-mono text-[11px] uppercase tracking-[0.16em] transition ${
+            allRevealed ? 'border-line text-ink2/50' : 'border-ink bg-bone text-ink hover:bg-ink hover:text-paper'
+          }`}
+        >
+          Partido a partido
+        </button>
+        <button
+          onClick={() => setRevealed(humanMatches.length)}
+          className={`rounded-lg border-2 px-4 py-2 font-mono text-[11px] uppercase tracking-[0.16em] transition ${
+            allRevealed ? 'border-ink bg-ink text-paper' : 'border-ink bg-bone text-ink hover:bg-ink hover:text-paper'
+          }`}
+        >
+          Automático
+        </button>
+      </div>
 
-      {!tournament.isSimulated && (
-        <div className="mt-8">
-          <SimulateButton />
+      <div className="overflow-hidden rounded-2xl border-2 border-ink shadow-hardsm">
+        {visible.map((m) => (
+          <MatchRow key={m.id} m={m} />
+        ))}
+      </div>
+
+      <div ref={feedEndRef} />
+
+      {!allRevealed ? (
+        <div className="text-center">
+          <button
+            onClick={() => setRevealed((r) => Math.min(r + 1, humanMatches.length))}
+            className="rounded-2xl border-2 border-ink bg-gradient-to-r from-celeste to-violeta px-12 py-5 font-slab text-xl uppercase tracking-wide text-white shadow-hard transition hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none"
+          >
+            Siguiente partido →
+          </button>
         </div>
+      ) : (
+        <>
+          <SummaryCard tournament={tournament} matches={humanMatches} />
+          <WorldDetail tournament={tournament} />
+        </>
       )}
-
-      {tournament.isSimulated && (
-        <div className="mt-8 space-y-12">
-          {/* Fase de grupos — resultados humanos */}
-          <div>
-            <div className="mb-6 flex items-center gap-3">
-              <span className="h-px flex-1 bg-white/10" />
-              <span className="font-mono text-xs uppercase tracking-[0.32em] text-cyan/80">Fase de grupos</span>
-              <span className="h-px flex-1 bg-white/10" />
-            </div>
-
-            <div className="grid gap-6">
-              {tournament.groups.map((group) => {
-                const isHumanGroup = group.entries.some((e) => e.id === humanId)
-                return (
-                  <article key={group.code}
-                    className={`rounded-3xl border p-6 ${
-                      isHumanGroup
-                        ? 'border-cyan/20 bg-cyan/5 shadow-[0_0_30px_-12px_rgba(0,200,200,0.08)]'
-                        : 'border-white/10 bg-night/60'
-                    }`}>
-                    <div className="flex items-center justify-between gap-3 mb-4">
-                      <h3 className="text-xl font-semibold">
-                        Grupo {group.code}
-                        {isHumanGroup && <span className="ml-3 font-mono text-xs uppercase tracking-[0.18em] text-cyan/70">Tu grupo</span>}
-                      </h3>
-                      <span className="rounded-full border border-white/10 px-3 py-1 font-mono text-xs text-sand/50">{group.entries.length} equipos</span>
-                    </div>
-
-                    {isHumanGroup && humanId && (
-                      <div className="mb-5">
-                        <HumanGroupMatches fixtures={group.fixtures} humanEntryId={humanId} />
-                      </div>
-                    )}
-
-                    <GroupStandingsTable standings={group.standings} humanEntryId={humanId} />
-                  </article>
-                )
-              })}
-            </div>
-          </div>
-
-          {/* Fase eliminatoria */}
-          {tournament.knockoutMatches.length > 0 && (
-            <div>
-              <div className="mb-6 flex items-center gap-3">
-                <span className="h-px flex-1 bg-white/10" />
-                <span className="font-mono text-xs uppercase tracking-[0.32em] text-ember/80">Fase eliminatoria</span>
-                <span className="h-px flex-1 bg-white/10" />
-              </div>
-
-              <HumanKnockoutMatches knockoutMatches={tournament.knockoutMatches} humanEntryId={humanId ?? ''} />
-            </div>
-          )}
-
-          <div className="flex justify-center gap-4">
-            <Link href="/draft"
-              className="rounded-full border border-white/15 px-6 py-3 font-mono text-xs uppercase tracking-[0.25em] text-sand/60 transition hover:border-white/30">
-              Volver al draft
-            </Link>
-          </div>
-        </div>
-      )}
-    </>
+    </div>
   )
 }

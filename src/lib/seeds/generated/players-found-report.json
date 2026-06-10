@@ -1,0 +1,380 @@
+[
+  {
+    "country": "Brasil",
+    "name": "Bremer",
+    "status": "fc26_match",
+    "ovr": 86
+  },
+  {
+    "country": "México",
+    "name": "Luis Chávez",
+    "status": "fc26_match",
+    "ovr": 75
+  },
+  {
+    "country": "México",
+    "name": "Alexis Vega",
+    "status": "fc26_match",
+    "ovr": 75
+  },
+  {
+    "country": "México",
+    "name": "César Huerta",
+    "status": "fc26_match",
+    "ovr": 73
+  },
+  {
+    "country": "Uruguay",
+    "name": "Sergio Rochet",
+    "status": "fc26_match",
+    "ovr": 80
+  },
+  {
+    "country": "Uruguay",
+    "name": "Joaquín Piquerez",
+    "status": "fc26_match",
+    "ovr": 78
+  },
+  {
+    "country": "Uruguay",
+    "name": "Giorgian De Arrascaeta",
+    "status": "fc26_match",
+    "ovr": 86
+  },
+  {
+    "country": "Uruguay",
+    "name": "Rodrigo Aguirre",
+    "status": "fc26_match",
+    "ovr": 76
+  },
+  {
+    "country": "Paraguay",
+    "name": "Fabián Balbuena",
+    "status": "fc26_match",
+    "ovr": 77
+  },
+  {
+    "country": "Paraguay",
+    "name": "Gustavo Gómez",
+    "status": "fc26_match",
+    "ovr": 80
+  },
+  {
+    "country": "Paraguay",
+    "name": "Junior Alonso",
+    "status": "fc26_match",
+    "ovr": 77
+  },
+  {
+    "country": "Paraguay",
+    "name": "Damián Bobadilla",
+    "status": "fc26_match",
+    "ovr": 74
+  },
+  {
+    "country": "Paraguay",
+    "name": "Isidro Pitta",
+    "status": "fc26_match",
+    "ovr": 75
+  },
+  {
+    "country": "Turquía",
+    "name": "Ugurcan Cakir",
+    "status": "fc26_match",
+    "ovr": 79
+  },
+  {
+    "country": "Turquía",
+    "name": "Altay Bayindir",
+    "status": "fc26_match",
+    "ovr": 76
+  },
+  {
+    "country": "Turquía",
+    "name": "Ferdi Kadioglu",
+    "status": "fc26_match",
+    "ovr": 79
+  },
+  {
+    "country": "Turquía",
+    "name": "Kenan Yildiz",
+    "status": "fc26_match",
+    "ovr": 78
+  },
+  {
+    "country": "Turquía",
+    "name": "Baris Alper Yilmaz",
+    "status": "fc26_match",
+    "ovr": 76
+  },
+  {
+    "country": "Colombia",
+    "name": "Camilo Vargas",
+    "status": "fc26_match",
+    "ovr": 75
+  },
+  {
+    "country": "Colombia",
+    "name": "Santiago Arias",
+    "status": "fc26_match",
+    "ovr": 75
+  },
+  {
+    "country": "Colombia",
+    "name": "Willer Ditta",
+    "status": "fc26_match",
+    "ovr": 75
+  },
+  {
+    "country": "Colombia",
+    "name": "Richard Ríos",
+    "status": "fc26_match",
+    "ovr": 76
+  },
+  {
+    "country": "Colombia",
+    "name": "James Rodríguez",
+    "status": "fc26_match",
+    "ovr": 83
+  },
+  {
+    "country": "Colombia",
+    "name": "Jhon Córdoba",
+    "status": "fc26_match",
+    "ovr": 78
+  },
+  {
+    "country": "Noruega",
+    "name": "Alexander Sorloth",
+    "status": "fc26_match",
+    "ovr": 80
+  },
+  {
+    "country": "Brasil",
+    "name": "Weverton",
+    "status": "fc26_match",
+    "ovr": 76
+  },
+  {
+    "country": "Brasil",
+    "name": "Douglas Santos",
+    "status": "fc26_match",
+    "ovr": 79
+  },
+  {
+    "country": "Brasil",
+    "name": "Léo Pereira",
+    "status": "fc26_match",
+    "ovr": 75
+  },
+  {
+    "country": "Brasil",
+    "name": "Luiz Henrique",
+    "status": "fc26_match",
+    "ovr": 78
+  },
+  {
+    "country": "Ecuador",
+    "name": "Enner Valencia",
+    "status": "fc26_match",
+    "ovr": 79
+  },
+  {
+    "country": "España",
+    "name": "Álex Grimaldo",
+    "status": "fc26_match",
+    "ovr": 85
+  },
+  {
+    "country": "Canadá",
+    "name": "Marcelo Flores",
+    "status": "fc26_match",
+    "ovr": 66
+  },
+  {
+    "country": "Estados Unidos",
+    "name": "Alejandro Zendejas",
+    "status": "fc26_match",
+    "ovr": 74
+  },
+  {
+    "country": "Alemania",
+    "name": "Pascal Groß",
+    "status": "fc26_match",
+    "ovr": 82
+  },
+  {
+    "country": "Corea Del Sur",
+    "name": "Lee Gi-hyuk",
+    "status": "fc25_match",
+    "ovr": 58
+  },
+  {
+    "country": "Canadá",
+    "name": "Ali Ahmed",
+    "status": "fc26_match",
+    "ovr": 64
+  },
+  {
+    "country": "Canadá",
+    "name": "Promise David",
+    "status": "fc26_match",
+    "ovr": 63
+  },
+  {
+    "country": "Brasil",
+    "name": "Danilo Santos",
+    "status": "fc26_match",
+    "ovr": 76
+  },
+  {
+    "country": "Marruecos",
+    "name": "Yassine Gessime",
+    "status": "fc25_match",
+    "ovr": 60
+  },
+  {
+    "country": "Estados Unidos",
+    "name": "Matt Turner",
+    "status": "fc26_match",
+    "ovr": 74
+  },
+  {
+    "country": "Australia",
+    "name": "Jordon Bos",
+    "status": "fc26_match",
+    "ovr": 69
+  },
+  {
+    "country": "Paraguay",
+    "name": "Roberto Jr. Fernández",
+    "status": "fc25_match",
+    "ovr": 73
+  },
+  {
+    "country": "Paraguay",
+    "name": "Kaku Romero Gamarra",
+    "status": "fc26_match",
+    "ovr": 79
+  },
+  {
+    "country": "Alemania",
+    "name": "Nathaniel Brown",
+    "status": "fc26_match",
+    "ovr": 69
+  },
+  {
+    "country": "Japón",
+    "name": "Hikori Ito",
+    "status": "fc26_match",
+    "ovr": 79
+  },
+  {
+    "country": "Japón",
+    "name": "Kaoru Ueda",
+    "status": "fc26_match",
+    "ovr": 74
+  },
+  {
+    "country": "Japón",
+    "name": "Iori Suzuki",
+    "status": "fc26_match",
+    "ovr": 71
+  },
+  {
+    "country": "Nueva Zelanda",
+    "name": "Matt Garbett",
+    "status": "fc26_match",
+    "ovr": 64
+  },
+  {
+    "country": "España",
+    "name": "Fabián",
+    "status": "fc26_match",
+    "ovr": 82
+  },
+  {
+    "country": "España",
+    "name": "Gavi",
+    "status": "fc26_match",
+    "ovr": 83
+  },
+  {
+    "country": "Cabo Verde",
+    "name": "Joao Paulo",
+    "status": "fc26_match",
+    "ovr": 76
+  },
+  {
+    "country": "Arabia Saudita",
+    "name": "Alaa Al-Hajji",
+    "status": "fc25_match",
+    "ovr": 63
+  },
+  {
+    "country": "Senegal",
+    "name": "Kreppin Diatta",
+    "status": "fc26_match",
+    "ovr": 75
+  },
+  {
+    "country": "Noruega",
+    "name": "Thelonious Aasgaard",
+    "status": "fc26_match",
+    "ovr": 66
+  },
+  {
+    "country": "Argentina",
+    "name": "José López",
+    "status": "fc25_match",
+    "ovr": 66
+  },
+  {
+    "country": "Jordania",
+    "name": "Yazan Al Arab",
+    "status": "fc26_match",
+    "ovr": 62
+  },
+  {
+    "country": "Portugal",
+    "name": "José Sá",
+    "status": "fc26_match",
+    "ovr": 79
+  },
+  {
+    "country": "Portugal",
+    "name": "Rui Silva",
+    "status": "fc26_match",
+    "ovr": 81
+  },
+  {
+    "country": "Colombia",
+    "name": "Yohan Mojica",
+    "status": "fc26_match",
+    "ovr": 77
+  },
+  {
+    "country": "Colombia",
+    "name": "Juan Camilo Portilla",
+    "status": "fc26_match",
+    "ovr": 72
+  },
+  {
+    "country": "Panamá",
+    "name": "Jorge Gutiérrez",
+    "status": "fc25_match",
+    "ovr": 67
+  },
+  {
+    "country": "Panamá",
+    "name": "Andrés Andrade",
+    "status": "fc26_match",
+    "ovr": 71
+  },
+  {
+    "country": "Panamá",
+    "name": "José Luis Rodríguez",
+    "status": "fc25_match",
+    "ovr": 68
+  }
+]

@@ -6,15 +6,64 @@ import { getDb } from '@/lib/db/client'
 import {
   draftedTeamPlayers,
   draftedTeams,
-  groupStandings,
-  matches,
+  formations,
   nationalTeams,
+  players,
   tournamentEntries,
   tournaments,
   users,
 } from '@/lib/db/schema'
+import { simulateSingleplayerTournament } from '@/lib/tournaments/simulate'
 
 const GROUP_CODES = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L']
+
+type Lane = 'GK' | 'DEF' | 'MID' | 'ATT'
+
+type DraftedPlayerRating = {
+  slotCode: string
+  attack: number
+  midfield: number
+  defense: number
+  goalkeeping: number
+  ovr: number
+}
+
+// Calcula las stats del equipo humano a partir de los jugadores realmente
+// drafteados, agregando por linea segun la formacion elegida. Asi la habilidad
+// del draft (que jugadores y en que posiciones) impacta directamente la
+// simulacion, en vez de usar el rating de las selecciones de origen.
+function computeDraftedTeamRatings(
+  draftedPlayers: DraftedPlayerRating[],
+  laneBySlot: Map<string, Lane>,
+) {
+  const byLane: Record<Lane, DraftedPlayerRating[]> = { GK: [], DEF: [], MID: [], ATT: [] }
+
+  for (const player of draftedPlayers) {
+    const lane = laneBySlot.get(player.slotCode)
+    if (lane) {
+      byLane[lane].push(player)
+    }
+  }
+
+  // Rating de cada linea usando el atributo dominante de esa zona, con fallback
+  // al promedio general del equipo si la linea quedara vacia.
+  const overallOvr = average(draftedPlayers.map((p) => p.ovr))
+  const laneRating = (lane: Lane, attribute: keyof DraftedPlayerRating) => {
+    const group = byLane[lane]
+    if (group.length === 0) {
+      return overallOvr
+    }
+    return average(group.map((p) => Number(p[attribute])))
+  }
+
+  return {
+    attack: laneRating('ATT', 'attack'),
+    midfield: laneRating('MID', 'midfield'),
+    defense: laneRating('DEF', 'defense'),
+    goalkeeping: laneRating('GK', 'goalkeeping'),
+    ovr: overallOvr,
+  }
+}
 
 function average(numbers: number[]) {
   if (numbers.length === 0) {
@@ -55,31 +104,6 @@ function shuffle<T>(array: T[], seedSource: string) {
   return clone
 }
 
-function createRoundRobinPairings(entryIds: string[]) {
-  const rotations = [...entryIds]
-  const pairings: Array<{ home: string; away: string; order: number }> = []
-
-  for (let round = 0; round < rotations.length - 1; round += 1) {
-    for (let index = 0; index < rotations.length / 2; index += 1) {
-      const home = rotations[index]
-      const away = rotations[rotations.length - 1 - index]
-      pairings.push({ home, away, order: pairings.length + 1 })
-    }
-
-    const fixed = rotations[0]
-    const rest = rotations.slice(1)
-    const last = rest.pop()
-
-    if (!fixed || !last) {
-      continue
-    }
-
-    rest.unshift(last)
-    rotations.splice(0, rotations.length, fixed, ...rest)
-  }
-
-  return pairings
-}
 
 export async function createSingleplayerTournament(sessionToken: string) {
   const db = getDb()
@@ -100,26 +124,63 @@ export async function createSingleplayerTournament(sessionToken: string) {
     throw new Error('No existe un equipo draft completado para iniciar el torneo.')
   }
 
-  const existingTournament = await db.query.tournaments.findFirst({
-    where: and(eq(tournaments.type, 'SINGLEPLAYER'), eq(tournaments.status, 'GROUP_STAGE')),
-    orderBy: (table, { desc }) => [desc(table.updatedAt)],
-  })
+  // Limpia SOLO los torneos singleplayer previos de ESTE usuario (vinculados a
+  // sus equipos drafteados), no los de otros. El vinculo usuario->torneo se
+  // resuelve via tournament_entries.drafted_team_id -> drafted_teams.user_id.
+  const userDraftedTeams = await db
+    .select({ id: draftedTeams.id })
+    .from(draftedTeams)
+    .where(eq(draftedTeams.userId, user.id))
 
-  if (existingTournament) {
-    await db.delete(tournaments).where(eq(tournaments.id, existingTournament.id))
+  const userDraftedTeamIds = userDraftedTeams.map((team) => team.id)
+
+  if (userDraftedTeamIds.length > 0) {
+    const priorEntries = await db
+      .select({ tournamentId: tournamentEntries.tournamentId })
+      .from(tournamentEntries)
+      .where(inArray(tournamentEntries.draftedTeamId, userDraftedTeamIds))
+
+    const priorTournamentIds = [...new Set(priorEntries.map((entry) => entry.tournamentId))]
+
+    if (priorTournamentIds.length > 0) {
+      await db
+        .delete(tournaments)
+        .where(
+          and(eq(tournaments.type, 'SINGLEPLAYER'), inArray(tournaments.id, priorTournamentIds)),
+        )
+    }
   }
 
   const draftedPlayers = await db
     .select({
-      attack: nationalTeams.attack,
-      midfield: nationalTeams.midfield,
-      defense: nationalTeams.defense,
-      goalkeeping: nationalTeams.goalkeeping,
-      ovr: nationalTeams.ovr,
+      slotCode: draftedTeamPlayers.slotCode,
+      attack: players.attack,
+      midfield: players.midfield,
+      defense: players.defense,
+      goalkeeping: players.goalkeeping,
+      ovr: players.ovr,
     })
     .from(draftedTeamPlayers)
-    .innerJoin(nationalTeams, eq(draftedTeamPlayers.sourceNationalTeamId, nationalTeams.id))
+    .innerJoin(players, eq(draftedTeamPlayers.playerId, players.id))
     .where(eq(draftedTeamPlayers.draftedTeamId, draftedTeam.id))
+
+  if (draftedPlayers.length === 0) {
+    throw new Error('El equipo draft no tiene jugadores persistidos para calcular sus ratings.')
+  }
+
+  const formation = await db.query.formations.findFirst({
+    where: eq(formations.id, draftedTeam.formationId),
+  })
+
+  if (!formation) {
+    throw new Error('No existe la formacion asociada al equipo draft.')
+  }
+
+  const laneBySlot = new Map<string, Lane>(
+    formation.slots.map((slot) => [slot.code, slot.lane]),
+  )
+
+  const draftedRatings = computeDraftedTeamRatings(draftedPlayers, laneBySlot)
 
   const [createdTournament] = await db
     .insert(tournaments)
@@ -150,11 +211,11 @@ export async function createSingleplayerTournament(sessionToken: string) {
       entryType: 'HUMAN_DRAFTED',
       displayName: 'Tu Seleccion Draft',
       draftedTeamId: draftedTeam.id,
-      computedAttack: average(draftedPlayers.map((player) => player.attack)),
-      computedMidfield: average(draftedPlayers.map((player) => player.midfield)),
-      computedDefense: average(draftedPlayers.map((player) => player.defense)),
-      computedGoalkeeping: average(draftedPlayers.map((player) => player.goalkeeping)),
-      computedOvr: average(draftedPlayers.map((player) => player.ovr)),
+      computedAttack: draftedRatings.attack,
+      computedMidfield: draftedRatings.midfield,
+      computedDefense: draftedRatings.defense,
+      computedGoalkeeping: draftedRatings.goalkeeping,
+      computedOvr: draftedRatings.ovr,
       metadata: { origin: 'draft' },
     })
     .returning({ id: tournamentEntries.id })
@@ -183,33 +244,21 @@ export async function createSingleplayerTournament(sessionToken: string) {
     entryIds: allEntries.slice(index * 4, index * 4 + 4),
   }))
 
-  for (const group of groupedEntries) {
-    await db.update(tournamentEntries)
-      .set({ groupCode: group.code })
-      .where(inArray(tournamentEntries.id, group.entryIds))
+  // Asignacion de grupo: los 12 updates en paralelo (una sola tanda).
+  await Promise.all(
+    groupedEntries.map((group) =>
+      db
+        .update(tournamentEntries)
+        .set({ groupCode: group.code })
+        .where(inArray(tournamentEntries.id, group.entryIds)),
+    ),
+  )
 
-    await db.insert(groupStandings).values(
-      group.entryIds.map((entryId) => ({
-        tournamentId: createdTournament.id,
-        entryId,
-        groupCode: group.code,
-      }))
-    )
-
-    const fixtures = createRoundRobinPairings(group.entryIds)
-
-    await db.insert(matches).values(
-      fixtures.map((fixture, index) => ({
-        tournamentId: createdTournament.id,
-        round: 'GROUP' as const,
-        stageOrder: index + 1,
-        groupCode: group.code,
-        homeEntryId: fixture.home,
-        awayEntryId: fixture.away,
-        simulationSeed: createSeedFromString(`${createdTournament.id}:${group.code}:${fixture.home}:${fixture.away}`),
-      }))
-    )
-  }
+  // Simula todo el Mundial en el mismo paso de creacion. La simulacion crea los
+  // partidos (de grupo y eliminatorios) ya con resultado y las posiciones; por eso
+  // aca no se insertan fixtures ni standings vacios. Asi la unica espera del usuario
+  // ocurre al cerrar el draft y la reproduccion posterior es instantanea.
+  await simulateSingleplayerTournament(createdTournament.id)
 
   return {
     tournamentId: createdTournament.id,

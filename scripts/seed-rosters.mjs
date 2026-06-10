@@ -234,6 +234,8 @@ for (const group of grouped.values()) {
       slug: player.slug,
       name: player.name,
       shirtNumber: player.shirtNumber,
+      club: player.club ?? null,
+      birthDate: player.birthDate ?? null,
       primaryPosition: player.primaryPosition,
       secondaryPositions: player.secondaryPositions,
       attack: player.attack,

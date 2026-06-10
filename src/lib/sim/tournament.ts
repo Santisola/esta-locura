@@ -22,7 +22,14 @@ export function simulateFullTournament(
 
   const { ranking, qualified } = rankThirdPlaced(standings)
 
-  const qualifiedTeams = getQualifiedTeams(standings, qualified)
+  // Mapa con las stats completas (lineas) de cada equipo, para que la fase
+  // eliminatoria simule con los ratings reales y no solo con el OVR.
+  const teamStatsById = new Map<string, TeamStats>()
+  for (const group of groups) {
+    for (const entry of group.entries) {
+      teamStatsById.set(entry.id, entry)
+    }
+  }
 
   const entryNames = new Map<string, string>()
   const entryGroupCodes = new Map<string, string>()
@@ -42,6 +49,7 @@ export function simulateFullTournament(
     standings,
     qualified,
     entryNames,
+    teamStatsById,
     seedBase,
   )
 

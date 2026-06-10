@@ -1,0 +1,902 @@
+{
+  "searchDate": "2026-06-09T18:56:06.412Z",
+  "targetCount": 110,
+  "found": [
+    {
+      "slug": "guillermo-ochoa",
+      "name": "Guillermo Ochoa",
+      "country": "México",
+      "fc26Ovr": 77,
+      "fc26Name": "Guillermo Maripán",
+      "fc26Positions": "DFC",
+      "fc26Club": "Torino"
+    },
+    {
+      "slug": "jorge-sanchez",
+      "name": "Jorge Sánchez",
+      "country": "México",
+      "fc26Ovr": 83,
+      "fc26Name": "Jorge Resurrección",
+      "fc26Positions": "MCD",
+      "fc26Club": "Atlético de Madrid"
+    },
+    {
+      "slug": "cesar-huerta",
+      "name": "César Huerta",
+      "country": "México",
+      "fc26Ovr": 79,
+      "fc26Name": "César Azpilicueta Tanco",
+      "fc26Positions": "DFC",
+      "fc26Club": "Atlético de Madrid"
+    },
+    {
+      "slug": "kim-seung-gyu",
+      "name": "Kim Seung-gyu",
+      "country": "Corea Del Sur",
+      "fc26Ovr": 86,
+      "fc26Name": "Joshua Kimmich",
+      "fc26Positions": "LD",
+      "fc26Club": "FC Bayern München"
+    },
+    {
+      "slug": "kim-min-jae",
+      "name": "Kim Min-jae",
+      "country": "Corea Del Sur",
+      "fc26Ovr": 86,
+      "fc26Name": "Joshua Kimmich",
+      "fc26Positions": "LD",
+      "fc26Club": "FC Bayern München"
+    },
+    {
+      "slug": "lee-han-beom",
+      "name": "Lee Han-beom",
+      "country": "Corea Del Sur",
+      "fc26Ovr": 83,
+      "fc26Name": "Lieke Martens van Leer",
+      "fc26Positions": "EI",
+      "fc26Club": "PSG"
+    },
+    {
+      "slug": "park-jin-seob",
+      "name": "Park Jin-seob",
+      "country": "Corea Del Sur",
+      "fc26Ovr": 79,
+      "fc26Name": "Jess Park",
+      "fc26Positions": "ED",
+      "fc26Club": "Manchester City"
+    },
+    {
+      "slug": "lee-gi-hyuk",
+      "name": "Lee Gi-hyuk",
+      "country": "Corea Del Sur",
+      "fc26Ovr": 83,
+      "fc26Name": "Lieke Martens van Leer",
+      "fc26Positions": "EI",
+      "fc26Club": "PSG"
+    },
+    {
+      "slug": "lee-tae-seok",
+      "name": "Lee Tae-seok",
+      "country": "Corea Del Sur",
+      "fc26Ovr": 83,
+      "fc26Name": "Lieke Martens van Leer",
+      "fc26Positions": "EI",
+      "fc26Club": "PSG"
+    },
+    {
+      "slug": "kim-moon-hwan",
+      "name": "Kim Moon-hwan",
+      "country": "Corea Del Sur",
+      "fc26Ovr": 86,
+      "fc26Name": "Joshua Kimmich",
+      "fc26Positions": "LD",
+      "fc26Club": "FC Bayern München"
+    },
+    {
+      "slug": "yang-hyun-jun",
+      "name": "Yang Hyun-jun",
+      "country": "Corea Del Sur",
+      "fc26Ovr": 82,
+      "fc26Name": "Pierre-Emerick Aubameyang",
+      "fc26Positions": "DC",
+      "fc26Club": "Al Qadsiah"
+    },
+    {
+      "slug": "paik-seung-ho",
+      "name": "Paik Seung-ho",
+      "country": "Corea Del Sur",
+      "fc26Ovr": 72,
+      "fc26Name": "Seung Ho Paik",
+      "fc26Positions": "MC",
+      "fc26Club": "Birmingham City"
+    },
+    {
+      "slug": "hwang-in-beom",
+      "name": "Hwang In-beom",
+      "country": "Corea Del Sur",
+      "fc26Ovr": 78,
+      "fc26Name": "Hee Chan Hwang",
+      "fc26Positions": "DC",
+      "fc26Club": "Wolves"
+    },
+    {
+      "slug": "bae-jun-ho",
+      "name": "Bae Jun-ho",
+      "country": "Corea Del Sur",
+      "fc26Ovr": 79,
+      "fc26Name": "Alejandro Baena Rodríguez",
+      "fc26Positions": "MI",
+      "fc26Club": "Villarreal CF"
+    },
+    {
+      "slug": "eom-ji-sung",
+      "name": "Eom Ji-sung",
+      "country": "Corea Del Sur",
+      "fc26Ovr": 72,
+      "fc26Name": "Ji Sung Eom",
+      "fc26Positions": "MI",
+      "fc26Club": "Swansea City"
+    },
+    {
+      "slug": "hwang-hee-chan",
+      "name": "Hwang Hee-chan",
+      "country": "Corea Del Sur",
+      "fc26Ovr": 78,
+      "fc26Name": "Hee Chan Hwang",
+      "fc26Positions": "DC",
+      "fc26Club": "Wolves"
+    },
+    {
+      "slug": "lee-jae-sung",
+      "name": "Lee Jae-sung",
+      "country": "Corea Del Sur",
+      "fc26Ovr": 83,
+      "fc26Name": "Lieke Martens van Leer",
+      "fc26Positions": "EI",
+      "fc26Club": "PSG"
+    },
+    {
+      "slug": "lee-kang-in",
+      "name": "Lee Kang-in",
+      "country": "Corea Del Sur",
+      "fc26Ovr": 83,
+      "fc26Name": "Lieke Martens van Leer",
+      "fc26Positions": "EI",
+      "fc26Club": "PSG"
+    },
+    {
+      "slug": "son-heung-min",
+      "name": "Son Heung-min",
+      "country": "Corea Del Sur",
+      "fc26Ovr": 89,
+      "fc26Name": "Alisson Ramses Becker",
+      "fc26Positions": "POR",
+      "fc26Club": "Liverpool"
+    },
+    {
+      "slug": "cho-gue-sung",
+      "name": "Cho Gue-sung",
+      "country": "Corea Del Sur",
+      "fc26Ovr": 85,
+      "fc26Name": "Aurélien Tchouaméni",
+      "fc26Positions": "MCD",
+      "fc26Club": "Real Madrid"
+    },
+    {
+      "slug": "denis-visinsky",
+      "name": "Denis Visinsky",
+      "country": "República Checa",
+      "fc26Ovr": 80,
+      "fc26Name": "Denis Bouanga",
+      "fc26Positions": "EI",
+      "fc26Club": "LAFC"
+    },
+    {
+      "slug": "ronwen-williams",
+      "name": "Ronwen Williams",
+      "country": "Sudáfrica",
+      "fc26Ovr": 85,
+      "fc26Name": "Nicholas Williams Arthuer",
+      "fc26Positions": "MI",
+      "fc26Club": "Athletic Club"
+    },
+    {
+      "slug": "ivan-sunjic",
+      "name": "Ivan Šunjić",
+      "country": "Bosnia",
+      "fc26Ovr": 83,
+      "fc26Name": "Ivan Provedel",
+      "fc26Positions": "POR",
+      "fc26Club": "Latium"
+    },
+    {
+      "slug": "alex-sandro",
+      "name": "Alex Sandro",
+      "country": "Brasil",
+      "fc26Ovr": 90,
+      "fc26Name": "Alexia Putellas Segura",
+      "fc26Positions": "MC",
+      "fc26Club": "FC Barcelona"
+    },
+    {
+      "slug": "gabriel-magalhaes",
+      "name": "Gabriel Magalhaes",
+      "country": "Brasil",
+      "fc26Ovr": 86,
+      "fc26Name": "Gabriel dos S. Magalhães",
+      "fc26Positions": "DFC",
+      "fc26Club": "Arsenal"
+    },
+    {
+      "slug": "neymar-junior",
+      "name": "Neymar Júnior",
+      "country": "Brasil",
+      "fc26Ovr": 87,
+      "fc26Name": "Neymar da Silva Santos Jr.",
+      "fc26Positions": "EI",
+      "fc26Club": "Al Hilal"
+    },
+    {
+      "slug": "vinicius-junior",
+      "name": "Vinicius Junior",
+      "country": "Brasil",
+      "fc26Ovr": 90,
+      "fc26Name": "Vinícius José de Oliveira Júnior",
+      "fc26Positions": "EI",
+      "fc26Club": "Real Madrid"
+    },
+    {
+      "slug": "yassine-gessime",
+      "name": "Yassine Gessime",
+      "country": "Marruecos",
+      "fc26Ovr": 84,
+      "fc26Name": "Yassine Bounou",
+      "fc26Positions": "POR",
+      "fc26Club": "Al Hilal"
+    },
+    {
+      "slug": "josue-duverger",
+      "name": "Josué Duverger",
+      "country": "Haití",
+      "fc26Ovr": 71,
+      "fc26Name": "Josué Casimir",
+      "fc26Positions": "MD",
+      "fc26Club": "Le Havre AC"
+    },
+    {
+      "slug": "ricardo-ade",
+      "name": "Ricardo Adé",
+      "country": "Haití",
+      "fc26Ovr": 81,
+      "fc26Name": "Ricardo Jorge da Luz Horta",
+      "fc26Positions": "MCO",
+      "fc26Club": "SC Braga"
+    },
+    {
+      "slug": "dominique-simon",
+      "name": "Dominique Simon",
+      "country": "Haití",
+      "fc26Ovr": 84,
+      "fc26Name": "Dominique Janssen",
+      "fc26Positions": "DFC",
+      "fc26Club": "Manchester Utd"
+    },
+    {
+      "slug": "aiden-o-neill",
+      "name": "Aiden O’Neill",
+      "country": "Australia",
+      "fc26Ovr": 70,
+      "fc26Name": "Aiden O'Neill",
+      "fc26Positions": "MCD",
+      "fc26Club": "Standard Lieja"
+    },
+    {
+      "slug": "tete-yengi",
+      "name": "Tete Yengi",
+      "country": "Australia",
+      "fc26Ovr": 76,
+      "fc26Name": "Kenny Tete",
+      "fc26Positions": "LD",
+      "fc26Club": "Fulham"
+    },
+    {
+      "slug": "roberto-jr-fernandez",
+      "name": "Roberto Jr. Fernández",
+      "country": "Paraguay",
+      "fc26Ovr": 80,
+      "fc26Name": "Roberto Firmino Barbosa de Oliveira",
+      "fc26Positions": "MCO",
+      "fc26Club": "Al Ahli"
+    },
+    {
+      "slug": "juan-caceres",
+      "name": "Juan Cáceres",
+      "country": "Paraguay",
+      "fc26Ovr": 80,
+      "fc26Name": "Juan Foyth",
+      "fc26Positions": "LD",
+      "fc26Club": "Villarreal CF"
+    },
+    {
+      "slug": "jose-canale",
+      "name": "José Canale",
+      "country": "Paraguay",
+      "fc26Ovr": 90,
+      "fc26Name": "Vinícius José de Oliveira Júnior",
+      "fc26Positions": "EI",
+      "fc26Club": "Real Madrid"
+    },
+    {
+      "slug": "julio-enciso",
+      "name": "Julio Enciso",
+      "country": "Paraguay",
+      "fc26Ovr": 77,
+      "fc26Name": "Igor Julio dos Santos de Paulo",
+      "fc26Positions": "DFC",
+      "fc26Club": "Brighton"
+    },
+    {
+      "slug": "ghislain-konan",
+      "name": "Ghislain Konan",
+      "country": "Costa De Marfil",
+      "fc26Ovr": 69,
+      "fc26Name": "Inès Konan",
+      "fc26Positions": "MD",
+      "fc26Club": "FC Fleury 91"
+    },
+    {
+      "slug": "evan-n-dicka",
+      "name": "Evan N’Dicka",
+      "country": "Costa De Marfil",
+      "fc26Ovr": 80,
+      "fc26Name": "F. Evanilson de Lima Barbosa",
+      "fc26Positions": "DC",
+      "fc26Club": "AFC Bournemouth"
+    },
+    {
+      "slug": "franck-kessie",
+      "name": "Franck Kessié",
+      "country": "Costa De Marfil",
+      "fc26Ovr": 82,
+      "fc26Name": "Franck Yannick Kessié",
+      "fc26Positions": "MCD",
+      "fc26Club": "Al Ahli"
+    },
+    {
+      "slug": "bazoumana-toure",
+      "name": "Bazoumana Touré",
+      "country": "Costa De Marfil",
+      "fc26Ovr": 72,
+      "fc26Name": "Isaak Touré",
+      "fc26Positions": "DFC",
+      "fc26Club": "Udinese"
+    },
+    {
+      "slug": "eloy-room",
+      "name": "Eloy Room",
+      "country": "Curazao",
+      "fc26Ovr": 79,
+      "fc26Name": "Shea Groom",
+      "fc26Positions": "MC",
+      "fc26Club": "Chicago Stars FC"
+    },
+    {
+      "slug": "jurgen-locadia",
+      "name": "Jürgen Locadia",
+      "country": "Curazao",
+      "fc26Ovr": 72,
+      "fc26Name": "Jurgen Ekkelenkamp",
+      "fc26Positions": "MCO",
+      "fc26Club": "Udinese"
+    },
+    {
+      "slug": "jordy-alcivar",
+      "name": "Jordy Alcívar",
+      "country": "Ecuador",
+      "fc26Ovr": 79,
+      "fc26Name": "Jordy Clasie",
+      "fc26Positions": "MCD",
+      "fc26Club": ""
+    },
+    {
+      "slug": "gonzalo-plata",
+      "name": "Gonzalo Plata",
+      "country": "Ecuador",
+      "fc26Ovr": 76,
+      "fc26Name": "Gonzalo Montiel",
+      "fc26Positions": "LD",
+      "fc26Club": "Sevilla FC"
+    },
+    {
+      "slug": "taha-ali",
+      "name": "Taha Ali",
+      "country": "Suecia",
+      "fc26Ovr": 68,
+      "fc26Name": "Taha Abdi Ali",
+      "fc26Positions": "MI",
+      "fc26Club": "Malmö FF"
+    },
+    {
+      "slug": "aymen-dahmen",
+      "name": "Aymen Dahmen",
+      "country": "Túnez",
+      "fc26Ovr": 71,
+      "fc26Name": "Aymen Barkok",
+      "fc26Positions": "MCO",
+      "fc26Club": "1. FSV Mainz 05"
+    },
+    {
+      "slug": "anis-ben-slimane",
+      "name": "Anis Ben Slimane",
+      "country": "Túnez",
+      "fc26Ovr": 82,
+      "fc26Name": "Stanislav Lobotka",
+      "fc26Positions": "MC",
+      "fc26Club": "SSC Napoli"
+    },
+    {
+      "slug": "sarpreet-singh",
+      "name": "Sarpreet Singh",
+      "country": "Nueva Zelanda",
+      "fc26Ovr": 64,
+      "fc26Name": "Gurpreet Singh Sandhu",
+      "fc26Positions": "POR",
+      "fc26Club": "Bengaluru FC"
+    },
+    {
+      "slug": "ehsan-hajsafi",
+      "name": "Ehsan Hajsafi",
+      "country": "Irán",
+      "fc26Ovr": 71,
+      "fc26Name": "Ehsan Haji Safi",
+      "fc26Positions": "LI",
+      "fc26Club": "AEK Athens"
+    },
+    {
+      "slug": "saman-ghoddos",
+      "name": "Saman Ghoddos",
+      "country": "Irán",
+      "fc26Ovr": 76,
+      "fc26Name": "Samantha Steuerwald",
+      "fc26Positions": "DFC",
+      "fc26Club": "SC Freiburg"
+    },
+    {
+      "slug": "ali-alipour",
+      "name": "Ali Alipour",
+      "country": "Irán",
+      "fc26Ovr": 89,
+      "fc26Name": "Alisson Ramses Becker",
+      "fc26Positions": "POR",
+      "fc26Club": "Liverpool"
+    },
+    {
+      "slug": "alex-grimaldo",
+      "name": "Álex Grimaldo",
+      "country": "España",
+      "fc26Ovr": 90,
+      "fc26Name": "Alexia Putellas Segura",
+      "fc26Positions": "MC",
+      "fc26Club": "FC Barcelona"
+    },
+    {
+      "slug": "c-j-dos-santos",
+      "name": "C. J. Dos Santos",
+      "country": "Cabo Verde",
+      "fc26Ovr": 88,
+      "fc26Name": "Rúben Santos Gato Alves Dias",
+      "fc26Positions": "DFC",
+      "fc26Club": "Manchester City"
+    },
+    {
+      "slug": "marcio-rosa",
+      "name": "Márcio Rosa",
+      "country": "Cabo Verde",
+      "fc26Ovr": 81,
+      "fc26Name": "Álvaro Valles Rosa",
+      "fc26Positions": "POR",
+      "fc26Club": "UD Las Palmas"
+    },
+    {
+      "slug": "sidny-lopes-cabral",
+      "name": "Sidny Lopes Cabral",
+      "country": "Cabo Verde",
+      "fc26Ovr": 78,
+      "fc26Name": "Nélson Cabral Semedo",
+      "fc26Positions": "LD",
+      "fc26Club": "Wolves"
+    },
+    {
+      "slug": "jamiro-monteiro",
+      "name": "Jamiro Monteiro",
+      "country": "Cabo Verde",
+      "fc26Ovr": 82,
+      "fc26Name": "Otávio Edmilson da Silva Monteiro",
+      "fc26Positions": "MCO",
+      "fc26Club": "Al Nassr"
+    },
+    {
+      "slug": "deroy-duarte",
+      "name": "Deroy Duarte",
+      "country": "Cabo Verde",
+      "fc26Ovr": 79,
+      "fc26Name": "Mário Rui Silva Duarte",
+      "fc26Positions": "LI",
+      "fc26Club": "SSC Napoli"
+    },
+    {
+      "slug": "ryan-mendes",
+      "name": "Ryan Mendes",
+      "country": "Cabo Verde",
+      "fc26Ovr": 83,
+      "fc26Name": "Henrikh Mkhitaryan",
+      "fc26Positions": "MC",
+      "fc26Club": "Lombardia FC"
+    },
+    {
+      "slug": "garry-rodrigues",
+      "name": "Garry Rodrigues",
+      "country": "Cabo Verde",
+      "fc26Ovr": 64,
+      "fc26Name": "James McGarry",
+      "fc26Positions": "LI",
+      "fc26Club": "Aberdeen"
+    },
+    {
+      "slug": "willy-semedo",
+      "name": "Willy Semedo",
+      "country": "Cabo Verde",
+      "fc26Ovr": 77,
+      "fc26Name": "Willy Boly",
+      "fc26Positions": "DFC",
+      "fc26Club": "Notting. Forest"
+    },
+    {
+      "slug": "helio-varela",
+      "name": "Hélio Varela",
+      "country": "Cabo Verde",
+      "fc26Ovr": 80,
+      "fc26Name": "Danilo Luís Hélio Pereira",
+      "fc26Positions": "DFC",
+      "fc26Club": "Al Ittihad"
+    },
+    {
+      "slug": "brian-rodriguez",
+      "name": "Brian Rodríguez",
+      "country": "Uruguay",
+      "fc26Ovr": 89,
+      "fc26Name": "María Pilar León Cebrián",
+      "fc26Positions": "DFC",
+      "fc26Club": "FC Barcelona"
+    },
+    {
+      "slug": "mohammed-al-owais",
+      "name": "Mohammed Al-Owais",
+      "country": "Arabia Saudita",
+      "fc26Ovr": 82,
+      "fc26Name": "Mohammed Kudus",
+      "fc26Positions": "MD",
+      "fc26Club": "West Ham Utd"
+    },
+    {
+      "slug": "nawaf-al-aqidi",
+      "name": "Nawaf Al-Aqidi",
+      "country": "Arabia Saudita",
+      "fc26Ovr": 68,
+      "fc26Name": "Nawaf Al Aqidi",
+      "fc26Positions": "POR",
+      "fc26Club": "Al Nassr"
+    },
+    {
+      "slug": "abdulelah-al-amri",
+      "name": "Abdulelah Al-Amri",
+      "country": "Arabia Saudita",
+      "fc26Ovr": 69,
+      "fc26Name": "Abdulelah Al Amri",
+      "fc26Positions": "DFC",
+      "fc26Club": "Al Ittihad"
+    },
+    {
+      "slug": "hassan-kadesh",
+      "name": "Hassan Kadesh",
+      "country": "Arabia Saudita",
+      "fc26Ovr": 73,
+      "fc26Name": "Hassane Kamara",
+      "fc26Positions": "LI",
+      "fc26Club": "Udinese"
+    },
+    {
+      "slug": "nasser-al-dawsari",
+      "name": "Nasser Al-Dawsari",
+      "country": "Arabia Saudita",
+      "fc26Ovr": 69,
+      "fc26Name": "Youssef Aït Bennasser",
+      "fc26Positions": "MCD",
+      "fc26Club": "Samsunspor"
+    },
+    {
+      "slug": "ziyad-al-johani",
+      "name": "Ziyad Al-Johani",
+      "country": "Arabia Saudita",
+      "fc26Ovr": 62,
+      "fc26Name": "Ziyad Al Sahafi",
+      "fc26Positions": "DFC",
+      "fc26Club": "Al Riyadh"
+    },
+    {
+      "slug": "alaa-al-hajji",
+      "name": "Alaa Al-Hajji",
+      "country": "Arabia Saudita",
+      "fc26Ovr": 68,
+      "fc26Name": "Alaa Bellaarouch",
+      "fc26Positions": "POR",
+      "fc26Club": "Strasbourg"
+    },
+    {
+      "slug": "salem-al-dawsari",
+      "name": "Salem Al-Dawsari",
+      "country": "Arabia Saudita",
+      "fc26Ovr": 80,
+      "fc26Name": "Salem Al Dawsari",
+      "fc26Positions": "MI",
+      "fc26Club": "Al Hilal"
+    },
+    {
+      "slug": "firas-al-buraikan",
+      "name": "Firas Al-Buraikan",
+      "country": "Arabia Saudita",
+      "fc26Ovr": 75,
+      "fc26Name": "Firas Al Birekan",
+      "fc26Positions": "DC",
+      "fc26Club": "Al Ahli"
+    },
+    {
+      "slug": "saleh-al-shehri",
+      "name": "Saleh Al-Shehri",
+      "country": "Arabia Saudita",
+      "fc26Ovr": 68,
+      "fc26Name": "Saleh Al Shehri",
+      "fc26Positions": "DC",
+      "fc26Club": "Al Ittihad"
+    },
+    {
+      "slug": "adrien-rabiot",
+      "name": "Adrien Rabiot",
+      "country": "Francia",
+      "fc26Ovr": 77,
+      "fc26Name": "Adrien Truffert",
+      "fc26Positions": "LI",
+      "fc26Club": "Stade Rennais FC"
+    },
+    {
+      "slug": "kristoffer-vassbakk-ajer",
+      "name": "Kristoffer Vassbakk Ajer",
+      "country": "Noruega",
+      "fc26Ovr": 76,
+      "fc26Name": "Kristoffer Ajer",
+      "fc26Positions": "DFC",
+      "fc26Club": "Brentford"
+    },
+    {
+      "slug": "david-moller-wolfe",
+      "name": "David Moller Wolfe",
+      "country": "Noruega",
+      "fc26Ovr": 85,
+      "fc26Name": "David Alaba",
+      "fc26Positions": "DFC",
+      "fc26Club": "Real Madrid"
+    },
+    {
+      "slug": "alexander-sorloth",
+      "name": "Alexander Sorloth",
+      "country": "Noruega",
+      "fc26Ovr": 86,
+      "fc26Name": "Trent Alexander-Arnold",
+      "fc26Positions": "LD",
+      "fc26Club": "Liverpool"
+    },
+    {
+      "slug": "ahmed-yahya",
+      "name": "Ahmed Yahya",
+      "country": "Irak",
+      "fc26Ovr": 74,
+      "fc26Name": "Anel Ahmedhodžić",
+      "fc26Positions": "DFC",
+      "fc26Club": "Sheffield Utd"
+    },
+    {
+      "slug": "marko-farji",
+      "name": "Marko Farji",
+      "country": "Irak",
+      "fc26Ovr": 80,
+      "fc26Name": "Marko Arnautović",
+      "fc26Positions": "DC",
+      "fc26Club": "Lombardia FC"
+    },
+    {
+      "slug": "ali-al-hamadi",
+      "name": "Ali Al-Hamadi",
+      "country": "Irak",
+      "fc26Ovr": 89,
+      "fc26Name": "Alisson Ramses Becker",
+      "fc26Positions": "POR",
+      "fc26Club": "Liverpool"
+    },
+    {
+      "slug": "emiliano-martinez",
+      "name": "Emiliano Martínez",
+      "country": "Argentina",
+      "fc26Ovr": 87,
+      "fc26Name": "Emiliano Martínez",
+      "fc26Positions": "POR",
+      "fc26Club": "Aston Villa"
+    },
+    {
+      "slug": "thiago-almada",
+      "name": "Thiago Almada",
+      "country": "Argentina",
+      "fc26Ovr": 76,
+      "fc26Name": "Igor Thiago Rodrigues",
+      "fc26Positions": "DC",
+      "fc26Club": "Brentford"
+    },
+    {
+      "slug": "jose-lopez",
+      "name": "José López",
+      "country": "Argentina",
+      "fc26Ovr": 90,
+      "fc26Name": "Vinícius José de Oliveira Júnior",
+      "fc26Positions": "EI",
+      "fc26Club": "Real Madrid"
+    },
+    {
+      "slug": "david-affengruber",
+      "name": "David Affengruber",
+      "country": "Austria",
+      "fc26Ovr": 85,
+      "fc26Name": "David Alaba",
+      "fc26Positions": "DFC",
+      "fc26Club": "Real Madrid"
+    },
+    {
+      "slug": "fares-ghedjemis",
+      "name": "Farès Ghedjemis",
+      "country": "Argelia",
+      "fc26Ovr": 77,
+      "fc26Name": "Farès Chaïbi",
+      "fc26Positions": "MCO",
+      "fc26Club": "Frankfurt"
+    },
+    {
+      "slug": "jhon-arias",
+      "name": "Jhon Arias",
+      "country": "Colombia",
+      "fc26Ovr": 77,
+      "fc26Name": "Jhon Lucumí",
+      "fc26Positions": "DFC",
+      "fc26Club": "Bolonia"
+    },
+    {
+      "slug": "james-rodriguez",
+      "name": "James Rodríguez",
+      "country": "Colombia",
+      "fc26Ovr": 86,
+      "fc26Name": "Lauren James",
+      "fc26Positions": "ED",
+      "fc26Club": "Chelsea"
+    },
+    {
+      "slug": "carlos-gomez",
+      "name": "Carlos Gómez",
+      "country": "Colombia",
+      "fc26Ovr": 84,
+      "fc26Name": "Carlos Henrique Venancio Casimiro",
+      "fc26Positions": "MCD",
+      "fc26Club": "Man Utd"
+    },
+    {
+      "slug": "juan-camilo-hernandez",
+      "name": "Juan Camilo Hernández",
+      "country": "Colombia",
+      "fc26Ovr": 78,
+      "fc26Name": "Juan Camilo Hernández Suárez",
+      "fc26Positions": "DC",
+      "fc26Club": "Columbus Crew"
+    },
+    {
+      "slug": "gael-kakuta",
+      "name": "Gaël Kakuta",
+      "country": "República Democrática Del Congo",
+      "fc26Ovr": 67,
+      "fc26Name": "Gaël Ondoua",
+      "fc26Positions": "MCD",
+      "fc26Club": "Servette FC"
+    },
+    {
+      "slug": "igor-sergeev",
+      "name": "Igor Sergeev",
+      "country": "Uzbekistán",
+      "fc26Ovr": 80,
+      "fc26Name": "Igor Zubeldia Elorza",
+      "fc26Positions": "DFC",
+      "fc26Club": "Real Sociedad"
+    },
+    {
+      "slug": "nico-o-reilly",
+      "name": "Nico O’Reilly",
+      "country": "Inglaterra",
+      "fc26Ovr": 87,
+      "fc26Name": "Nicolò Barella",
+      "fc26Positions": "MC",
+      "fc26Club": "Lombardia FC"
+    },
+    {
+      "slug": "ivan-perisic",
+      "name": "Ivan Perisic",
+      "country": "Croacia",
+      "fc26Ovr": 83,
+      "fc26Name": "Ivan Provedel",
+      "fc26Positions": "POR",
+      "fc26Club": "Latium"
+    },
+    {
+      "slug": "jorge-gutierrez",
+      "name": "Jorge Gutiérrez",
+      "country": "Panamá",
+      "fc26Ovr": 83,
+      "fc26Name": "Jorge Resurrección",
+      "fc26Positions": "MCD",
+      "fc26Club": "Atlético de Madrid"
+    },
+    {
+      "slug": "jose-luis-rodriguez",
+      "name": "José Luis Rodríguez",
+      "country": "Panamá",
+      "fc26Ovr": 90,
+      "fc26Name": "Vinícius José de Oliveira Júnior",
+      "fc26Positions": "EI",
+      "fc26Club": "Real Madrid"
+    },
+    {
+      "slug": "cecilio-waterman",
+      "name": "Cecilio Waterman",
+      "country": "Panamá",
+      "fc26Ovr": 73,
+      "fc26Name": "Cecilio Domínguez",
+      "fc26Positions": "MI",
+      "fc26Club": ""
+    },
+    {
+      "slug": "tomas-rodriguez",
+      "name": "Tomás Rodríguez",
+      "country": "Panamá",
+      "fc26Ovr": 79,
+      "fc26Name": "Tomáš Souček",
+      "fc26Positions": "MCD",
+      "fc26Club": "West Ham Utd"
+    },
+    {
+      "slug": "lawrence-ati-zigi",
+      "name": "Lawrence Ati-Zigi",
+      "country": "Ghana",
+      "fc26Ovr": 85,
+      "fc26Name": "Ashley Lawrence",
+      "fc26Positions": "LD",
+      "fc26Club": "Chelsea"
+    }
+  ],
+  "notFound": [
+    "Jo Hyeon-woo",
+    "Oh Hyeon-gyu",
+    "Nihad Mujakić",
+    "Ayoube Amaimouni",
+    "Louicius Don Deedson",
+    "Jurien Gaari",
+    "Gervane Kastaneer",
+    "Memphis Depay",
+    "Kento Shiogai",
+    "Milad Mohammadi",
+    "Alireza Jahanbakhsh",
+    "Moteb Al-Harbi"
+  ]
+}

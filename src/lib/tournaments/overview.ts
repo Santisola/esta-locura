@@ -66,6 +66,7 @@ export type BracketMatchInfo = {
   wentToPenalties: boolean
   winnerId: string | null
   order: number
+  events: Array<{ minute: number; type: string; side: string; playerName: string | null }>
 }
 
 export type TournamentOverview = {
@@ -88,6 +89,7 @@ export type TournamentOverview = {
   }>
   knockoutMatches: BracketMatchInfo[]
   isSimulated: boolean
+  topScorer: { name: string; goals: number } | null
 }
 
 export async function getSingleplayerTournamentOverview(sessionToken: string): Promise<TournamentOverview | null> {
@@ -163,6 +165,21 @@ export async function getSingleplayerTournamentOverview(sessionToken: string): P
       existing.push(event)
       eventsByMatch.set(event.matchId, existing)
     }
+  }
+
+  // Goleador del torneo: se cuenta a partir de los eventos ya cargados (goles de
+  // grupo y eliminatorias), sin query adicional.
+  const goalsByPlayer = new Map<string, number>()
+  for (const events of eventsByMatch.values()) {
+    for (const event of events) {
+      if (event.eventType === 'GOAL' && event.playerName) {
+        goalsByPlayer.set(event.playerName, (goalsByPlayer.get(event.playerName) ?? 0) + 1)
+      }
+    }
+  }
+  let topScorer: { name: string; goals: number } | null = null
+  for (const [name, goals] of goalsByPlayer) {
+    if (!topScorer || goals > topScorer.goals) topScorer = { name, goals }
   }
 
   const dbStandings = await db.query.groupStandings.findMany({
@@ -263,6 +280,12 @@ export async function getSingleplayerTournamentOverview(sessionToken: string): P
         wentToPenalties: m.wentToPenalties,
         winnerId: m.winnerEntryId,
         order: m.stageOrder,
+        events: (eventsByMatch.get(m.id) ?? []).map((ev) => ({
+          minute: ev.minute,
+          type: ev.eventType,
+          side: ev.side,
+          playerName: ev.playerName,
+        })),
       })
     }
   }
@@ -283,5 +306,6 @@ export async function getSingleplayerTournamentOverview(sessionToken: string): P
     groups,
     knockoutMatches,
     isSimulated,
+    topScorer,
   }
 }

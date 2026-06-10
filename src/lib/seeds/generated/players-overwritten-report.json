@@ -1,0 +1,32 @@
+[
+  {
+    "country": "México",
+    "name": "Luis Chávez",
+    "status": "corrected"
+  },
+  {
+    "country": "México",
+    "name": "Armando González",
+    "status": "corrected"
+  },
+  {
+    "country": "México",
+    "name": "Alexis Vega",
+    "status": "corrected"
+  },
+  {
+    "country": "Brasil",
+    "name": "Bremer",
+    "status": "corrected_unmatched_to_fc26_match"
+  },
+  {
+    "country": "Colombia",
+    "name": "Álvaro Montero",
+    "status": "corrected_wikidata_mismatch"
+  },
+  {
+    "country": "México",
+    "name": "Johan Vásquez",
+    "status": "corrected_wikidata_mismatch"
+  }
+]
