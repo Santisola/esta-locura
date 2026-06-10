@@ -238,19 +238,24 @@ export function DraftWorkbench({ formations, countries }: DraftWorkbenchProps) {
   )
 
   const boxScore = useMemo(() => {
-    if (!draftState) return { ovr: null, ataque: null, defensa: null }
+    const empty = { ovr: null, ataque: null, medio: null, defensa: null, arquero: null }
+    if (!draftState) return empty
     const picked = Object.entries(draftState.picks)
       .map(([slot, pid]) => ({ slot, p: playersById[pid] }))
       .filter((x) => x.p)
-    if (picked.length === 0) return { ovr: null, ataque: null, defensa: null }
+    if (picked.length === 0) return empty
     const avg = (arr: number[]) => (arr.length ? Math.round(arr.reduce((a, b) => a + b, 0) / arr.length) : null)
     const laneAttr = (lane: string, attr: keyof DraftPlayer) =>
       avg(picked.filter((x) => laneBySlot.get(x.slot) === lane).map((x) => Number(x.p[attr])))
-    return {
-      ovr: avg(picked.map((x) => x.p.ovr)),
-      ataque: laneAttr('ATT', 'attack') ?? avg(picked.map((x) => x.p.attack)),
-      defensa: laneAttr('DEF', 'defense') ?? avg(picked.map((x) => x.p.defense)),
-    }
+    const ataque = laneAttr('ATT', 'attack')
+    const medio = laneAttr('MID', 'midfield')
+    const defensa = laneAttr('DEF', 'defense')
+    const arquero = laneAttr('GK', 'goalkeeping')
+    // La media es el promedio de las líneas presentes (lo que se muestra), no del
+    // ovr de cada jugador — así Ataque/Medio/Defensa/Arquero siempre cuadran con la Media.
+    const lines = [ataque, medio, defensa, arquero].filter((v): v is number => v != null)
+    const ovr = lines.length ? Math.round(lines.reduce((a, b) => a + b, 0) / lines.length) : null
+    return { ovr, ataque, medio, defensa, arquero }
   }, [draftState, playersById, laneBySlot])
 
   const revealRatings = activeDifficulty === 'CLASSIC' || isComplete
@@ -621,23 +626,32 @@ function BoxScore({ formation, picks, playersById, filled, total, boxScore, reve
   playersById: Record<string, DraftPlayer>
   filled: number
   total: number
-  boxScore: { ovr: number | null; ataque: number | null; defensa: number | null }
+  boxScore: { ovr: number | null; ataque: number | null; medio: number | null; defensa: number | null; arquero: number | null }
   revealRatings: boolean
 }) {
   const show = (v: number | null) => (v != null && revealRatings ? String(v) : '—')
+  const lines: Array<{ key: string; label: string; value: number | null; accent?: boolean }> = [
+    { key: 'atk', label: 'Ataque', value: boxScore.ataque, accent: true },
+    { key: 'med', label: 'Medio', value: boxScore.medio },
+    { key: 'def', label: 'Defensa', value: boxScore.defensa },
+    { key: 'gk', label: 'Arquero', value: boxScore.arquero },
+  ]
   return (
     <aside className="rounded-2xl border-2 border-ink bg-bone p-4 shadow-hardsm">
       <div className="flex items-start justify-between">
-        <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-ink2">Box score · {filled}/{total}</p>
-        <span className="font-slab text-4xl leading-none text-ink">{show(boxScore.ovr)}</span>
+        <div>
+          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-ink2">Box score · {filled}/{total}</p>
+          <p className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-ink2/70">Media del equipo</p>
+        </div>
+        <span className="font-slab text-5xl leading-none text-ink">{show(boxScore.ovr)}</span>
       </div>
-      <div className="mt-2 flex gap-5 border-b-2 border-ink/15 pb-3">
-        <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-ink2">
-          <span className="font-slab text-lg text-vermillion">{show(boxScore.ataque)}</span> Ataque
-        </p>
-        <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-ink2">
-          <span className="font-slab text-lg text-ink">{show(boxScore.defensa)}</span> Defensa
-        </p>
+      <div className="mt-3 grid grid-cols-4 gap-2 border-b-2 border-ink/15 pb-3">
+        {lines.map((l) => (
+          <div key={l.key} className="text-center">
+            <p className={`font-slab text-lg leading-none ${l.accent ? 'text-vermillion' : 'text-ink'}`}>{show(l.value)}</p>
+            <p className="mt-1 font-mono text-[9px] uppercase tracking-[0.1em] text-ink2">{l.label}</p>
+          </div>
+        ))}
       </div>
 
       <ul className="mt-3 space-y-1">
