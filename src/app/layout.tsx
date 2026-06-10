@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Bricolage_Grotesque, Space_Mono } from 'next/font/google'
+import { Anton, Bricolage_Grotesque, Space_Mono } from 'next/font/google'
 
 import './globals.css'
 
@@ -14,6 +14,13 @@ const monoFont = Space_Mono({
   weight: ['400', '700'],
 })
 
+// Display condensado y contundente para titulares y números grandes (estilo deportivo).
+const slabFont = Anton({
+  subsets: ['latin'],
+  variable: '--font-slab',
+  weight: ['400'],
+})
+
 export const metadata: Metadata = {
   title: 'Esta Locura',
   description: 'Draft y simulacion del Mundial 2026 con modo singleplayer y multiplayer.',
@@ -26,7 +33,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <body className={`${displayFont.variable} ${monoFont.variable} bg-night text-sand antialiased`}>
+      <body className={`${displayFont.variable} ${monoFont.variable} ${slabFont.variable} bg-night text-sand antialiased`}>
         {children}
       </body>
     </html>

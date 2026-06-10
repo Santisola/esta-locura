@@ -16,28 +16,85 @@ import type {
 type DraftWorkbenchProps = DraftBootstrap
 
 const STORAGE_KEY = 'esta-locura.singleplayer-draft.v1'
-const DIFFICULTY_OPTIONS: Array<{ value: DraftDifficultyMode; title: string; detail: string }> = [
-  {
-    value: 'CLASSIC',
-    title: 'Vision total',
-    detail: 'Ves el potencial de cada carta y decidis con toda la informacion sobre la mesa.',
-  },
-  {
-    value: 'MEMORY',
-    title: 'Pulso ciego',
-    detail: 'Elegis por intuicion. El verdadero impacto se revela despues.',
-  },
+
+const DIFFICULTY_OPTIONS: Array<{ value: DraftDifficultyMode; label: string }> = [
+  { value: 'CLASSIC', label: 'Clásico' },
+  { value: 'MEMORY', label: 'De memoria' },
 ]
 
-const PITCH_ROWS: Record<string, { label: string; color: string }> = {
-  GK: { label: 'Arquero', color: 'border-l-amber/40' },
-  DEF: { label: 'Defensa', color: 'border-l-cyan/40' },
-  MID: { label: 'Mediocampo', color: 'border-l-emerald/40' },
-  ATT: { label: 'Ataque', color: 'border-l-red/40' },
+// Etiquetas de posición estilo planilla (español).
+const POS_LABEL: Record<string, string> = {
+  GK: 'POR', LB: 'LI', RB: 'LD', CB: 'DFC', SW: 'LIB', LWB: 'CAI', RWB: 'CAD',
+  CDM: 'MCD', CM: 'MC', CAM: 'MEI', LM: 'EI', RM: 'ED',
+  LW: 'EI', RW: 'ED', ST: 'DC', CF: 'DC', LF: 'DC', RF: 'DC',
 }
 
-// Parsea la respuesta como JSON de forma segura. Si el server devuelve HTML
-// (404/500), evita el error cripto "Unexpected token '<'" y retorna null.
+function posLabel(slotCode: string) {
+  const base = slotCode.replace(/[0-9]/g, '')
+  return POS_LABEL[base] ?? base
+}
+
+function surname(name: string) {
+  const parts = name.trim().split(' ')
+  return parts[parts.length - 1]
+}
+
+// Nivel vertical por tipo de posición (0 = arquero abajo, 5 = delantero arriba).
+const TIER: Record<string, number> = {
+  GK: 0,
+  CB: 1, LB: 1, RB: 1, SW: 1, LWB: 1, RWB: 1,
+  CDM: 2,
+  CM: 3, LM: 3, RM: 3,
+  CAM: 4,
+  LW: 5, RW: 5, ST: 5, CF: 5, LF: 5, RF: 5,
+}
+// Flanco horizontal: negativo = izquierda de la pantalla, positivo = derecha.
+const FLANK: Record<string, number> = {
+  LB: -2, LWB: -2, LM: -2, LW: -2, LF: -1,
+  RB: 2, RWB: 2, RM: 2, RW: 2, RF: 1,
+}
+
+function baseCode(code: string) {
+  return code.replace(/[0-9]/g, '')
+}
+function tierOf(code: string) {
+  return TIER[baseCode(code)] ?? 3
+}
+function flankOf(code: string) {
+  return FLANK[baseCode(code)] ?? 0
+}
+
+type PitchNode = { code: string; lane: string; x: number; y: number }
+
+// Posiciona los slots por niveles (eje vertical) y flanco (eje horizontal). Así
+// el lateral/extremo izquierdo queda a la izquierda y el derecho a la derecha, y
+// las formaciones con más líneas (4-2-3-1, etc.) se ven con su escalonado real.
+function pitchPositions(slots: Array<{ code: string; lane: string }>): PitchNode[] {
+  const tiers = [...new Set(slots.map((s) => tierOf(s.code)))].sort((a, b) => a - b)
+  const Y_BOTTOM = 90
+  const Y_TOP = 20
+  const out: PitchNode[] = []
+
+  tiers.forEach((tier, tierIndex) => {
+    const y = tiers.length === 1 ? 55 : Y_BOTTOM - (tierIndex / (tiers.length - 1)) * (Y_BOTTOM - Y_TOP)
+    const rowSlots = slots
+      .map((slot, index) => ({ slot, index }))
+      .filter(({ slot }) => tierOf(slot.code) === tier)
+      .sort((a, b) => flankOf(a.slot.code) - flankOf(b.slot.code) || a.index - b.index)
+
+    rowSlots.forEach(({ slot }, i) => {
+      out.push({
+        code: slot.code,
+        lane: slot.lane,
+        x: ((i + 1) / (rowSlots.length + 1)) * 100,
+        y,
+      })
+    })
+  })
+
+  return out
+}
+
 async function readJsonSafe<T>(res: Response): Promise<T | null> {
   const text = await res.text()
   if (!text) return null
@@ -59,24 +116,12 @@ function normalizeDraftState(state: DraftSessionState): DraftSessionState {
   }
 }
 
-function formatSlotLabel(slotCode: string) {
-  if (slotCode.startsWith('CB')) return 'Central'
-  if (slotCode.startsWith('CM')) return 'Interior'
-  if (slotCode.startsWith('ST')) return 'Delantero'
-  const map: Record<string, string> = {
-    GK: 'Arquero', LB: 'Lateral izq.', RB: 'Lateral der.',
-    LM: 'Banda izq.', RM: 'Banda der.',
-    LW: 'Extremo izq.', RW: 'Extremo der.',
-  }
-  return map[slotCode] ?? slotCode
-}
-
-export function DraftWorkbench({ summary, formations, countries }: DraftWorkbenchProps) {
+export function DraftWorkbench({ formations, countries }: DraftWorkbenchProps) {
   const [selectedFormationCode, setSelectedFormationCode] = useState(formations[0]?.code ?? '')
   const [selectedDifficulty, setSelectedDifficulty] = useState<DraftDifficultyMode>('CLASSIC')
   const [draftState, setDraftState] = useState<DraftSessionState | null>(null)
   const [isHydrated, setIsHydrated] = useState(false)
-  const [persistenceMode, setPersistenceMode] = useState<DraftPersistenceMode>('local-fallback')
+  const [, setPersistenceMode] = useState<DraftPersistenceMode>('local-fallback')
   const [isFinalizing, setIsFinalizing] = useState(false)
   const [tournamentMessage, setTournamentMessage] = useState<string | null>(null)
   const [tournamentId, setTournamentId] = useState<string | null>(null)
@@ -145,7 +190,9 @@ export function DraftWorkbench({ summary, formations, countries }: DraftWorkbenc
     [draftState?.formationCode, formations, selectedFormationCode],
   )
 
+  const activeDifficulty = draftState?.difficulty ?? selectedDifficulty
   const usedCountrySlugs = draftState?.usedCountrySlugs ?? []
+
   const openSlotCodes = useMemo(() => {
     if (!draftState || !activeFormation) return []
     return activeFormation.slots.map((s) => s.code).filter((c) => !draftState.picks[c])
@@ -166,7 +213,7 @@ export function DraftWorkbench({ summary, formations, countries }: DraftWorkbenc
     return [...currentCountry.players]
       .sort((a, b) => {
         const pg = (p: DraftPlayer) => {
-          const m: Record<string, number> = { GK: 0, DEF: 1, CB: 1, LB: 1, RB: 1, MID: 2, CM: 2, CDM: 2, CAM: 2, VOLANTES: 2, ATT: 3, ST: 3, LW: 3, RW: 3 }
+          const m: Record<string, number> = { GK: 0, DEF: 1, CB: 1, LB: 1, RB: 1, MID: 2, CM: 2, CDM: 2, CAM: 2, ATT: 3, ST: 3, LW: 3, RW: 3 }
           return m[p.listedPositionGroup] ?? m[p.primaryPosition] ?? 99
         }
         const d = pg(a) - pg(b)
@@ -176,14 +223,37 @@ export function DraftWorkbench({ summary, formations, countries }: DraftWorkbenc
       .map((p) => {
         const taken = draftState.usedPlayerIds.includes(p.id)
         const compat = taken ? [] : getCompatibleSlots(p, openSlotCodes)
-        return { ...p, compatibleSlots: compat, isDisabled: !p.isDataReady || taken || compat.length === 0, disabledReason: taken ? 'Ya en tu equipo.' : !p.isDataReady ? 'No disponible.' : compat.length === 0 ? 'No encaja.' : null }
+        return { ...p, compatibleSlots: compat, isDisabled: !p.isDataReady || taken || compat.length === 0, disabledReason: taken ? 'Ya en tu equipo' : !p.isDataReady ? 'No disponible' : compat.length === 0 ? 'No encaja' : null }
       })
   }, [currentCountry, draftState, openSlotCodes])
 
   const filled = draftState ? Object.keys(draftState.picks).length : 0
   const total = activeFormation?.slots.length ?? 0
-  const pct = total > 0 ? Math.round((filled / total) * 100) : 0
   const isComplete = Boolean(draftState && activeFormation && isDraftComplete(activeFormation.slots.map((s) => s.code), draftState.picks))
+
+  // ---- Box score: ratings agregados del equipo a partir de los picks ----
+  const laneBySlot = useMemo(
+    () => new Map((activeFormation?.slots ?? []).map((s) => [s.code, s.lane])),
+    [activeFormation],
+  )
+
+  const boxScore = useMemo(() => {
+    if (!draftState) return { ovr: null, ataque: null, defensa: null }
+    const picked = Object.entries(draftState.picks)
+      .map(([slot, pid]) => ({ slot, p: playersById[pid] }))
+      .filter((x) => x.p)
+    if (picked.length === 0) return { ovr: null, ataque: null, defensa: null }
+    const avg = (arr: number[]) => (arr.length ? Math.round(arr.reduce((a, b) => a + b, 0) / arr.length) : null)
+    const laneAttr = (lane: string, attr: keyof DraftPlayer) =>
+      avg(picked.filter((x) => laneBySlot.get(x.slot) === lane).map((x) => Number(x.p[attr])))
+    return {
+      ovr: avg(picked.map((x) => x.p.ovr)),
+      ataque: laneAttr('ATT', 'attack') ?? avg(picked.map((x) => x.p.attack)),
+      defensa: laneAttr('DEF', 'defense') ?? avg(picked.map((x) => x.p.defense)),
+    }
+  }, [draftState, playersById, laneBySlot])
+
+  const revealRatings = activeDifficulty === 'CLASSIC' || isComplete
 
   function pickRandom(next: DraftCountryGroup[]) {
     return next.length > 0 ? next[Math.floor(Math.random() * next.length)]?.countrySlug ?? null : null
@@ -240,233 +310,350 @@ export function DraftWorkbench({ summary, formations, countries }: DraftWorkbenc
       const data = await readJsonSafe<{ error?: string; tournament?: { tournamentId: string } }>(res)
       if (!res.ok || !data) throw new Error(data?.error ?? `No se pudo abrir el Mundial (error ${res.status}).`)
       setTournamentId(data.tournament?.tournamentId ?? null)
-      setTournamentMessage('Tu seleccion entro al Mundial. Segui la accion en el torneo.')
+      setTournamentMessage('Tu seleccion entró al Mundial.')
       setDraftState((s) => s ? { ...s, completedAt: s.completedAt ?? new Date().toISOString() } : s)
     } catch (e) { setTournamentMessage(e instanceof Error ? e.message : 'Error.') }
     finally { setIsFinalizing(false) }
   }
 
+  const nodes = activeFormation ? pitchPositions(activeFormation.slots) : []
+
+  const metaChips = [
+    activeFormation?.code,
+    activeDifficulty === 'CLASSIC' ? 'Clásico' : 'De memoria',
+  ].filter(Boolean) as string[]
+
   if (!isHydrated) {
-    return <div className="flex min-h-[60vh] items-center justify-center"><p className="text-sand/50">Preparando la sala...</p></div>
+    return <div className="flex min-h-[70vh] items-center justify-center"><p className="font-mono text-sm uppercase tracking-[0.3em] text-ink2">Preparando la mesa...</p></div>
   }
 
   return (
-    <>
-      {/* Setup — before draft starts */}
-      {!draftState && (
-        <div className="mx-auto max-w-3xl">
-          <div className="text-center">
-            <p className="font-mono text-xs uppercase tracking-[0.32em] text-cyan/90">Sala de draft</p>
-            <h1 className="mt-4 text-4xl font-semibold leading-tight sm:text-5xl">Elegi rapido, porque cada pais aparece una sola vez.</h1>
-            <p className="mt-4 text-base leading-7 text-sand/70">
-              Defini tu plan, deja que aparezcan las selecciones y arma un once con equilibrio y personalidad.
+    <div className="space-y-5">
+      {/* Header / scoreboard */}
+      <header className="flex flex-wrap items-end justify-between gap-4 border-b-2 border-ink/80 pb-4">
+        <Link href="/" className="flex items-center gap-3">
+          <span className="grid h-12 w-12 place-items-center rounded-xl border-2 border-ink bg-gradient-to-br from-celeste to-violeta font-slab text-xl text-white shadow-hardsm">EL</span>
+          <div>
+            <p className="font-slab text-2xl leading-none tracking-wide text-ink">
+              ESTA <span className="bg-gradient-to-r from-celeste to-violeta bg-clip-text text-transparent">LOCURA</span>
             </p>
+            <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.3em] text-ink2">Armá · Simulá · Ganá</p>
           </div>
-
-          <div className="mt-10 grid gap-6 sm:grid-cols-2">
-            <div className="space-y-3 rounded-2xl border border-white/10 bg-night/60 p-6">
-              <p className="font-mono text-xs uppercase tracking-[0.25em] text-cyan/85">Formacion</p>
-              {formations.map((f) => (
-                <button key={f.code} type="button" onClick={() => setSelectedFormationCode(f.code)}
-                  className={`w-full rounded-xl border px-4 py-3 text-left transition ${
-                    selectedFormationCode === f.code ? 'border-cyan bg-cyan/10' : 'border-white/10 bg-white/5 hover:border-white/25'
-                  }`}>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-mono text-xs uppercase tracking-[0.2em] text-cyan/85">{f.code}</p>
-                      <p className="mt-1 font-semibold">{f.name}</p>
-                    </div>
-                    <span className="rounded-full border border-white/10 px-3 py-1 font-mono text-xs text-sand/70">{f.slots.length} plazas</span>
-                  </div>
-                </button>
-              ))}
-            </div>
-
-            <div className="space-y-3 rounded-2xl border border-white/10 bg-night/60 p-6">
-              <p className="font-mono text-xs uppercase tracking-[0.25em] text-ember/85">Dificultad</p>
-              {DIFFICULTY_OPTIONS.map((o) => (
-                <button key={o.value} type="button" onClick={() => setSelectedDifficulty(o.value)}
-                  className={`w-full rounded-xl border px-4 py-3 text-left transition ${
-                    selectedDifficulty === o.value ? 'border-ember bg-ember/10' : 'border-white/10 bg-white/5 hover:border-white/25'
-                  }`}>
-                  <p className="font-mono text-xs uppercase tracking-[0.2em] text-ember/85">{o.value}</p>
-                  <p className="mt-1 font-semibold">{o.title}</p>
-                  <p className="mt-1 text-sm text-sand/60">{o.detail}</p>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="mt-8 text-center">
-            <button type="button" onClick={startDraft}
-              className="rounded-full bg-sand px-10 py-4 font-mono text-sm uppercase tracking-[0.3em] text-night transition hover:bg-white">
-              Empezar mi seleccion
-            </button>
-          </div>
+        </Link>
+        <div className="flex flex-wrap gap-2">
+          {metaChips.map((c) => (
+            <span key={c} className="rounded-full border border-line bg-bone px-3 py-1 font-mono text-[11px] uppercase tracking-[0.18em] text-ink2">{c}</span>
+          ))}
         </div>
-      )}
+      </header>
 
-      {/* Draft in progress */}
-      {draftState && (
-        <div className="grid gap-6 xl:grid-cols-[1fr_360px]">
-          {/* Left column — main gameplay */}
-          <div className="space-y-5">
-            {/* Progress bar + actions */}
-            <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-white/10 bg-night/60 px-5 py-4">
-              <div className="flex-1">
-                <div className="flex items-center justify-between gap-3">
-                  <p className="font-mono text-xs uppercase tracking-[0.22em] text-cyan/85">{filled}/{total} puestos</p>
-                  <span className="font-mono text-xs text-sand/50">{pct}%</span>
+      <div className="grid gap-5 lg:grid-cols-[300px_minmax(0,1fr)_300px]">
+        {/* ---------- IZQUIERDA: configuración / acción ---------- */}
+        <aside className="space-y-4">
+          {currentCountry && draftState ? (
+            <CountryPicker
+              country={currentCountry}
+              players={currentCountryPlayers}
+              rerollsLeft={draftState.rerollsLeft}
+              difficulty={activeDifficulty}
+              onAssign={assign}
+              onReroll={reroll}
+              canReroll={draftState.rerollsLeft > 0 && playableCountries.length > 0}
+            />
+          ) : (
+            <ConfigPanel
+              formations={formations}
+              selectedFormationCode={activeFormation?.code ?? selectedFormationCode}
+              onSelectFormation={setSelectedFormationCode}
+              selectedDifficulty={activeDifficulty}
+              onSelectDifficulty={setSelectedDifficulty}
+              locked={Boolean(draftState)}
+            />
+          )}
+
+          {/* Acción principal */}
+          <div className="rounded-2xl border-2 border-ink bg-bone p-4 shadow-hardsm">
+            {!draftState && (
+              <ActionButton onClick={startDraft} label="Tirar para empezar" dice />
+            )}
+
+            {draftState && !isComplete && !currentCountry && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.18em] text-ink2">
+                  <span>{filled}/{total} puestos</span>
+                  <button onClick={resetDraft} className="underline-offset-2 hover:underline">Reiniciar</button>
                 </div>
-                <div className="mt-2 h-2 overflow-hidden rounded-full bg-white/10">
-                  <div className="h-full rounded-full bg-gradient-to-r from-cyan to-emerald transition-all" style={{ width: `${pct}%` }} />
-                </div>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <button type="button" onClick={rollCountry}
+                <ActionButton
+                  onClick={rollCountry}
+                  label={filled === 0 ? 'Tirar selección' : 'Tirar siguiente'}
+                  dice
                   disabled={playableCountries.length === 0}
-                  className="rounded-full border border-cyan/30 px-4 py-2 font-mono text-xs uppercase tracking-[0.2em] text-cyan transition disabled:opacity-40 hover:border-cyan hover:bg-cyan/10">
-                  Girar
-                </button>
-                <button type="button" onClick={finalize}
-                  disabled={!isComplete || isFinalizing}
-                  className="rounded-full bg-sand px-4 py-2 font-mono text-xs uppercase tracking-[0.2em] text-night transition disabled:opacity-40 hover:bg-white">
-                  {isFinalizing ? 'Abriendo...' : 'Ir al Mundial'}
-                </button>
-                <button type="button" onClick={resetDraft}
-                  className="rounded-full border border-white/15 px-4 py-2 font-mono text-xs uppercase tracking-[0.2em] text-sand/60 transition hover:border-white/30">
-                  Reset
-                </button>
-              </div>
-            </div>
-
-            {/* Current country banner + players */}
-            {currentCountry ? (
-              <>
-                <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-night/60 px-5 py-4">
-                  <div>
-                    <p className="font-mono text-xs uppercase tracking-[0.22em] text-ember/85">Seleccion del momento</p>
-                    <h2 className="mt-1 text-2xl font-bold">{currentCountry.country}</h2>
-                    <p className="mt-1 text-sm text-sand/60">{currentCountry.readyPlayers} jugadores disponibles</p>
-                  </div>
-                  <div className="flex gap-2">
-                    <span className="rounded-full border border-white/10 px-3 py-1 font-mono text-xs text-sand/60">
-                      Rerolls: {draftState.rerollsLeft}
-                    </span>
-                    <button type="button" onClick={reroll}
-                      disabled={draftState.rerollsLeft <= 0 || playableCountries.length === 0}
-                      className="rounded-full border border-ember/30 px-4 py-2 font-mono text-xs uppercase tracking-[0.2em] text-ember transition disabled:opacity-40 hover:border-ember hover:bg-ember/10">
-                      Saltar pais
-                    </button>
-                  </div>
-                </div>
-
-                {/* Player cards — compact */}
-                <div className="space-y-2">
-                  {currentCountryPlayers.map((p) => (
-                    <div key={p.id}
-                      className={`rounded-xl border px-4 py-3 ${
-                        p.isDisabled ? 'border-amber-300/15 bg-amber-100/5 opacity-50' : 'border-white/10 bg-white/5'
-                      }`}>
-                      <div className="flex flex-wrap items-center gap-3">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span className="rounded border border-white/10 px-2 py-0.5 font-mono text-[11px] uppercase text-sand/50">{p.primaryPosition}</span>
-                            <p className="truncate font-semibold">{p.name}</p>
-                          </div>
-                          <p className="mt-0.5 text-sm text-sand/50 truncate">{p.club ?? ''}{p.birthDate ? ` · ${new Date().getFullYear() - new Date(p.birthDate).getFullYear()} años` : ''}</p>
-                        </div>
-                        {draftState.difficulty === 'CLASSIC' && (
-                          <span className="rounded-full border border-cyan/20 px-3 py-1 font-mono text-sm font-bold text-cyan">{p.ovr}</span>
-                        )}
-                        {!p.isDisabled && p.compatibleSlots.map((sc) => (
-                          <button key={sc} type="button" onClick={() => assign(p.id, sc)}
-                            className="rounded-full bg-cyan/15 px-3 py-1.5 font-mono text-xs uppercase tracking-[0.15em] text-cyan transition hover:bg-cyan/25">
-                            {formatSlotLabel(sc)}
-                          </button>
-                        ))}
-                      </div>
-                      {p.disabledReason && <p className="mt-1.5 text-sm text-amber-100/70">{p.disabledReason}</p>}
-                    </div>
-                  ))}
-                </div>
-              </>
-            ) : (
-              <div className="flex flex-col items-center justify-center gap-4 rounded-2xl border border-dashed border-white/15 bg-white/5 px-6 py-16 text-center">
-                <p className="text-lg font-semibold">Esperando la proxima seleccion</p>
-                <p className="max-w-md text-sm text-sand/60">Toca "Girar" para descubrir un pais y elegir a tus jugadores.</p>
-                {filled > 0 && (
-                  <button type="button" onClick={rollCountry}
-                    className="rounded-full bg-cyan/20 px-6 py-3 font-mono text-xs uppercase tracking-[0.25em] text-cyan transition hover:bg-cyan/30">
-                    Girar siguiente pais
-                  </button>
-                )}
+                />
               </div>
             )}
 
-            {/* Tournament created message */}
-            {tournamentMessage && (
-              <div className="rounded-2xl border border-emerald-300/15 bg-emerald-300/10 px-5 py-4 text-sm text-sand/80">
-                <p>{tournamentMessage}</p>
-                {tournamentId && (
-                  <Link href="/tournament" className="mt-3 inline-block rounded-full border border-white/15 px-4 py-2 font-mono text-xs uppercase tracking-[0.2em] text-sand/80 transition hover:border-white/30">
-                    Ir al torneo
-                  </Link>
-                )}
+            {draftState && isComplete && (
+              <div className="space-y-3 text-center">
+                <p className="font-slab text-xl tracking-wide text-ink">ALINEACIÓN COMPLETA {filled}/{total}</p>
+                <ActionButton onClick={finalize} label={isFinalizing ? 'Abriendo...' : 'Simular el Mundial'} arrow disabled={isFinalizing} />
+                <button onClick={resetDraft} className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink2 underline-offset-2 hover:underline">Reiniciar draft</button>
               </div>
             )}
-          </div>
 
-          {/* Right column — formation (compact) */}
-          <div className="rounded-2xl border border-white/10 bg-night/60 p-5">
-            <div className="flex items-center justify-between gap-3">
-              <p className="font-mono text-xs uppercase tracking-[0.22em] text-cyan/85">Tu formacion</p>
-              <p className="font-mono text-xs text-sand/50">{activeFormation?.name}</p>
-            </div>
-
-            <div className="mt-4 space-y-3">
-              {(['GK', 'DEF', 'MID', 'ATT'] as const).map((lane) => {
-                const laneSlots = activeFormation?.slots.filter((s) => s.lane === lane) ?? []
-                if (laneSlots.length === 0) return null
-                return (
-                  <div key={lane} className={`border-l-2 pl-3 ${PITCH_ROWS[lane]?.color ?? 'border-l-white/20'}`}>
-                    <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-sand/50">{PITCH_ROWS[lane]?.label ?? lane}</p>
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {laneSlots.map((slot) => {
-                        const picked = draftState?.picks[slot.code] ? playersById[draftState.picks[slot.code]] : null
-                        return (
-                          <div key={slot.code}
-                            className={`rounded-lg border px-3 py-2 text-center text-xs ${
-                              picked ? 'border-cyan/30 bg-cyan/10' : 'border-dashed border-white/15 bg-white/5'
-                            }`}>
-                            <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-sand/50">{slot.code}</p>
-                            {picked ? (
-                              <>
-                                <p className="mt-1 text-sm font-semibold leading-tight">{picked.name}</p>
-                                <p className="mt-0.5 text-[10px] text-sand/50">
-                                  {draftState?.difficulty === 'CLASSIC' ? `IMP ${picked.ovr}` : '???'}
-                                </p>
-                              </>
-                            ) : (
-                              <p className="mt-1 text-sm text-sand/40">—</p>
-                            )}
-                          </div>
-                        )
-                      })}
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-
-            {draftState?.completedAt && (
-              <p className="mt-4 rounded-lg border border-emerald-300/20 bg-emerald-300/10 px-3 py-2 text-center font-mono text-xs uppercase tracking-[0.2em] text-emerald-200">
-                Equipo completo
+            {!draftState && (
+              <p className="mt-3 text-center font-mono text-[11px] uppercase tracking-[0.16em] text-ink2">
+                Tirá para sortear una selección y un Mundial
               </p>
             )}
           </div>
+
+          {tournamentMessage && (
+            <div className="rounded-2xl border-2 border-grass bg-grass/10 p-4 text-center">
+              <p className="text-sm font-semibold text-ink">{tournamentMessage}</p>
+              {tournamentId && (
+                <Link href="/tournament" className="mt-3 inline-block rounded-full bg-ink px-5 py-2 font-mono text-[11px] uppercase tracking-[0.2em] text-paper">
+                  Ir a la campaña →
+                </Link>
+              )}
+            </div>
+          )}
+        </aside>
+
+        {/* ---------- CENTRO: la cancha ---------- */}
+        <Pitch
+          nodes={nodes}
+          picks={draftState?.picks ?? {}}
+          playersById={playersById}
+          revealRatings={revealRatings}
+        />
+
+        {/* ---------- DERECHA: box score ---------- */}
+        <BoxScore
+          formation={activeFormation}
+          picks={draftState?.picks ?? {}}
+          playersById={playersById}
+          filled={filled}
+          total={total}
+          boxScore={boxScore}
+          revealRatings={revealRatings}
+        />
+      </div>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Sub-componentes
+// ---------------------------------------------------------------------------
+function ActionButton({ onClick, label, disabled, dice, arrow }: {
+  onClick: () => void; label: string; disabled?: boolean; dice?: boolean; arrow?: boolean
+}) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-ink bg-gradient-to-r from-celeste to-violeta px-5 py-4 font-slab text-lg uppercase tracking-wide text-white shadow-hardsm transition hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none disabled:cursor-not-allowed disabled:opacity-40"
+    >
+      <span>{label}</span>
+      {dice && <span className="text-xl">🎲</span>}
+      {arrow && <span className="text-xl">→</span>}
+    </button>
+  )
+}
+
+function ConfigPanel({ formations, selectedFormationCode, onSelectFormation, selectedDifficulty, onSelectDifficulty, locked }: {
+  formations: DraftBootstrap['formations']
+  selectedFormationCode: string
+  onSelectFormation: (code: string) => void
+  selectedDifficulty: DraftDifficultyMode
+  onSelectDifficulty: (mode: DraftDifficultyMode) => void
+  locked: boolean
+}) {
+  return (
+    <div className="rounded-2xl border-2 border-ink bg-bone p-4 shadow-hardsm">
+      <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-ink2">Formación</p>
+      <div className="mt-3 grid grid-cols-3 gap-2">
+        {formations.map((f) => {
+          const active = f.code === selectedFormationCode
+          return (
+            <button
+              key={f.code}
+              onClick={() => !locked && onSelectFormation(f.code)}
+              disabled={locked && !active}
+              className={`rounded-lg border-2 px-2 py-3 text-center font-slab text-sm tracking-wide transition ${
+                active ? 'border-ink bg-ink text-paper' : 'border-line bg-paper2 text-ink hover:border-ink/50'
+              } ${locked ? 'cursor-default' : ''}`}
+            >
+              {f.code}
+            </button>
+          )
+        })}
+      </div>
+
+      <p className="mt-5 font-mono text-[11px] uppercase tracking-[0.24em] text-ink2">Modo · Dificultad</p>
+      <div className="mt-3 grid grid-cols-2 gap-2">
+        {DIFFICULTY_OPTIONS.map((o) => {
+          const active = o.value === selectedDifficulty
+          return (
+            <button
+              key={o.value}
+              onClick={() => !locked && onSelectDifficulty(o.value)}
+              disabled={locked && !active}
+              className={`rounded-lg border-2 px-3 py-2.5 text-center font-mono text-xs uppercase tracking-[0.12em] transition ${
+                active ? 'border-ink bg-ink text-paper' : 'border-line bg-paper2 text-ink hover:border-ink/50'
+              } ${locked ? 'cursor-default' : ''}`}
+            >
+              {o.label}
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+function CountryPicker({ country, players, rerollsLeft, difficulty, onAssign, onReroll, canReroll }: {
+  country: DraftCountryGroup
+  players: Array<DraftPlayer & { compatibleSlots: string[]; isDisabled: boolean; disabledReason: string | null }>
+  rerollsLeft: number
+  difficulty: DraftDifficultyMode
+  onAssign: (playerId: string, slotCode: string) => void
+  onReroll: () => void
+  canReroll: boolean
+}) {
+  return (
+    <div className="rounded-2xl border-2 border-ink bg-bone p-4 shadow-hardsm">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-vermillion">Selección del momento</p>
+          <h2 className="font-slab text-2xl leading-tight tracking-wide text-ink">{country.country}</h2>
         </div>
-      )}
-    </>
+        <div className="text-right">
+          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink2">Rerolls {rerollsLeft}</p>
+          <button
+            onClick={onReroll}
+            disabled={!canReroll}
+            className="mt-1 rounded-full border border-ink px-3 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-ink transition hover:bg-ink hover:text-paper disabled:opacity-30"
+          >
+            Saltar país
+          </button>
+        </div>
+      </div>
+
+      <div className="mt-4 max-h-[26rem] space-y-1.5 overflow-y-auto pr-1">
+        {players.map((p) => (
+          <div key={p.id} className={`rounded-lg border px-3 py-2 ${p.isDisabled ? 'border-line/60 bg-paper2/50 opacity-50' : 'border-line bg-paper2'}`}>
+            <div className="flex items-center gap-2">
+              <span className="w-9 shrink-0 rounded bg-ink/10 py-0.5 text-center font-mono text-[10px] uppercase text-ink2">{p.primaryPosition}</span>
+              <p className="min-w-0 flex-1 truncate text-sm font-semibold text-ink">{p.name}</p>
+              {difficulty === 'CLASSIC' && <span className="font-slab text-base text-vermillion">{p.ovr}</span>}
+            </div>
+            {!p.isDisabled && (
+              <div className="mt-1.5 flex flex-wrap gap-1.5">
+                {p.compatibleSlots.map((sc) => (
+                  <button
+                    key={sc}
+                    onClick={() => onAssign(p.id, sc)}
+                    className="rounded-md bg-ink px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.1em] text-paper transition hover:bg-vermillion"
+                  >
+                    {posLabel(sc)}
+                  </button>
+                ))}
+              </div>
+            )}
+            {p.disabledReason && <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.1em] text-ink2">{p.disabledReason}</p>}
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function Pitch({ nodes, picks, playersById, revealRatings }: {
+  nodes: PitchNode[]
+  picks: Record<string, string>
+  playersById: Record<string, DraftPlayer>
+  revealRatings: boolean
+}) {
+  return (
+    <div className="relative mx-auto aspect-[3/4] w-full max-w-[480px] overflow-hidden rounded-2xl border-2 border-ink bg-grass shadow-hardsm">
+      {/* Rayas del césped */}
+      <div className="absolute inset-0" style={{
+        backgroundImage: 'repeating-linear-gradient(180deg, rgba(255,255,255,0.05) 0 8.33%, transparent 8.33% 16.66%)',
+      }} />
+      {/* Líneas */}
+      <div className="pointer-events-none absolute inset-3 rounded-md border-2 border-white/35" />
+      <div className="pointer-events-none absolute left-3 right-3 top-1/2 h-[2px] -translate-y-1/2 bg-white/35" />
+      <div className="pointer-events-none absolute left-1/2 top-1/2 h-20 w-20 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white/35" />
+      <div className="pointer-events-none absolute left-1/2 top-3 h-16 w-36 -translate-x-1/2 border-2 border-t-0 border-white/35" />
+      <div className="pointer-events-none absolute bottom-3 left-1/2 h-16 w-36 -translate-x-1/2 border-2 border-b-0 border-white/35" />
+
+      {/* Nodos */}
+      {nodes.map((node) => {
+        const player = picks[node.code] ? playersById[picks[node.code]] : null
+        return (
+          <div
+            key={node.code}
+            className="absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center"
+            style={{ left: `${node.x}%`, top: `${node.y}%` }}
+          >
+            <div className={`flex h-12 w-12 items-center justify-center rounded-full text-center ${
+              player ? 'bg-bone text-ink shadow-hardsm' : 'border-2 border-dashed border-white/60 text-white/80'
+            }`}>
+              <span className={`font-slab leading-none ${player ? 'text-[11px]' : 'text-[10px]'}`}>{posLabel(node.code)}</span>
+            </div>
+            {player && (
+              <div className="mt-1 flex items-center gap-1 rounded bg-ink/85 px-1.5 py-0.5">
+                <span className="max-w-[68px] truncate font-mono text-[9px] uppercase tracking-wide text-paper">{surname(player.name)}</span>
+                {revealRatings && <span className="font-slab text-[10px] text-gold">{player.ovr}</span>}
+              </div>
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+function BoxScore({ formation, picks, playersById, filled, total, boxScore, revealRatings }: {
+  formation: DraftBootstrap['formations'][number] | undefined
+  picks: Record<string, string>
+  playersById: Record<string, DraftPlayer>
+  filled: number
+  total: number
+  boxScore: { ovr: number | null; ataque: number | null; defensa: number | null }
+  revealRatings: boolean
+}) {
+  const show = (v: number | null) => (v != null && revealRatings ? String(v) : '—')
+  return (
+    <aside className="rounded-2xl border-2 border-ink bg-bone p-4 shadow-hardsm">
+      <div className="flex items-start justify-between">
+        <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-ink2">Box score · {filled}/{total}</p>
+        <span className="font-slab text-4xl leading-none text-ink">{show(boxScore.ovr)}</span>
+      </div>
+      <div className="mt-2 flex gap-5 border-b-2 border-ink/15 pb-3">
+        <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-ink2">
+          <span className="font-slab text-lg text-vermillion">{show(boxScore.ataque)}</span> Ataque
+        </p>
+        <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-ink2">
+          <span className="font-slab text-lg text-ink">{show(boxScore.defensa)}</span> Defensa
+        </p>
+      </div>
+
+      <ul className="mt-3 space-y-1">
+        {(formation?.slots ?? []).map((slot) => {
+          const player = picks[slot.code] ? playersById[picks[slot.code]] : null
+          return (
+            <li key={slot.code} className="flex items-center gap-2 border-b border-line/60 py-1.5 last:border-0">
+              <span className="w-9 shrink-0 font-mono text-[10px] uppercase tracking-wide text-ink2">{posLabel(slot.code)}</span>
+              <span className={`min-w-0 flex-1 truncate text-sm ${player ? 'font-medium text-ink' : 'text-ink2/60'}`}>
+                {player ? player.name : '—'}
+              </span>
+              {player && revealRatings && <span className="font-slab text-sm text-vermillion">{player.ovr}</span>}
+            </li>
+          )
+        })}
+      </ul>
+    </aside>
   )
 }

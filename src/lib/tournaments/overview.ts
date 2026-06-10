@@ -66,6 +66,7 @@ export type BracketMatchInfo = {
   wentToPenalties: boolean
   winnerId: string | null
   order: number
+  events: Array<{ minute: number; type: string; side: string; playerName: string | null }>
 }
 
 export type TournamentOverview = {
@@ -279,6 +280,12 @@ export async function getSingleplayerTournamentOverview(sessionToken: string): P
         wentToPenalties: m.wentToPenalties,
         winnerId: m.winnerEntryId,
         order: m.stageOrder,
+        events: (eventsByMatch.get(m.id) ?? []).map((ev) => ({
+          minute: ev.minute,
+          type: ev.eventType,
+          side: ev.side,
+          playerName: ev.playerName,
+        })),
       })
     }
   }

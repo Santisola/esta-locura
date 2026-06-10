@@ -46,6 +46,26 @@
 
 ---
 
+## Rediseño integral (branch `redesign/integral`)
+
+Rediseño visual completo al estilo editorial-deportivo "7-0" (crema, tipografía contundente, sombras duras, look videojuego) inspirado en referencias del usuario, tomando el flujo: cancha al centro, box score al costado, simulación como sección aparte ("La campaña").
+
+- **Base de tema** (`tailwind.config.ts`, `layout.tsx`): paleta crema (`paper/bone/ink/vermillion/gold/grass`), sombras `hard/hardsm`, fuente display `Anton` (`font-slab`). Aditivo, no rompe el tema dark previo.
+- **Home** (`src/app/page.tsx`): logo "7–0 ESTA LOCURA", hero bold, stats y CTAs con botones de sombra dura.
+- **Draft** (`draft-workbench.tsx`, `app/draft/page.tsx`): layout de 3 columnas — config (formación/dificultad) a la izquierda, **cancha al centro con jugadores posicionados** (etiquetas POR/DFC/MC/DC…), **box score** a la derecha (OVR/Ataque/Defensa + ratings por puesto). Picker de país con jugadores reales. Botón TIRAR/SIMULAR. Modo "De memoria" oculta ratings hasta completar.
+- **Campaña** (`client-tournament.tsx`, `app/tournament/page.tsx`): feed editorial de los partidos del usuario (etapa, rival, goleadores/recibidos, marcador con color, ✓/✗, penales), toggle **Partido a partido / Automático**, card resumen negra (récord W-L, GF/GC/victorias, goleador) con Repetir/Compartir/Ver mi card, y "El resto del Mundial" colapsable. (Se agregaron `events` a `BracketMatchInfo` en el overview para mostrar goleadores en eliminatorias.)
+- **Historial** (`app/historial/page.tsx`): restyle crema.
+- **Verificado en preview** (datos reales): home, draft (con picker de Marruecos real + asignación), campaña completa (feed con goleadores reales + card resumen "4-2") renderizan correctamente; `tsc` sin errores.
+- **Pendiente del rediseño**: aún no se tocó el body global (cada página setea su propio fondo, así que conviven sin romperse). Posibles mejoras: selector de "Estilo" (Defensivo/Equilibrado/Ofensivo), banderas/códigos de país, swap de jugadores en la cancha.
+
+### Iteración 2 del rediseño (2026-06-10)
+- **Paleta Albiceleste**: re-tematizado de crema a **celeste / azul / violeta** (referencia Selección Argentina). En `tailwind.config.ts` se repurpusieron los tokens (paper=celeste claro, bone=blanco, ink=índigo profundo, vermillion=violeta, gold=celeste) y se agregaron `celeste/azul/violeta` para gradientes. CTAs principales con gradiente celeste→violeta. Sombras duras al nuevo índigo.
+- **Sin "7-0"**: se eliminó el logo "7–0" de home y draft; nuevo wordmark "ESTA LOCURA" con badge gradiente "EL" y "LOCURA" en gradiente. Verificado: sin refs a `7-0`/`Sete` en el código.
+- **8 formaciones**: agregadas 4-2-3-1, 4-2-4, 3-5-2, 5-3-2, 4-5-1 (antes 3). Actualizados `src/lib/seeds/formations.ts` y `scripts/seed-formations.mjs`; **seedeadas a DB** (`db:seed-formations`).
+- **Fix posiciones de la cancha**: las posiciones estaban espejadas (LD/LI y ED/EI al revés) porque se ordenaban por índice del array. Reescrito `pitchPositions` en `draft-workbench.tsx` para ubicar por **nivel** (tier por tipo de posición → eje vertical) y **flanco** (izq/der → eje horizontal). Verificado: LI/EI a la izquierda, LD/ED a la derecha; y las formaciones con más líneas (4-2-3-1) muestran su escalonado real.
+- **Verificación**: `tsc` sin errores; formaciones nuevas presentes en el draft (confirmado por DOM); lógica de posiciones validada numéricamente. (El screenshot del preview headless quedó colgado por un problema del renderer, no del código — la página responde 200 y renderiza por eval.)
+- **Para prod**: correr `npm run db:seed-formations` para tener las 8 formaciones.
+
 ## Registro de avances
 
 ### 2026-06-09 — Inicio C1 + C2

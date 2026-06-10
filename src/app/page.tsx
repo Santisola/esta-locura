@@ -7,102 +7,78 @@ export default async function HomePage() {
   const [overview, draftOverview] = await Promise.all([getProjectOverview(), getDraftOverview()])
 
   return (
-    <main className="relative overflow-hidden">
-      <div className="absolute inset-x-0 top-0 -z-10 h-[32rem] bg-pitch blur-3xl" />
-      <div className="absolute inset-x-0 top-0 -z-10 h-[32rem] bg-[radial-gradient(ellipse_at_center,rgba(0,200,200,0.08)_0%,transparent_70%)]" />
+    <main className="min-h-screen bg-paper text-ink">
+      <div className="mx-auto w-full max-w-[1000px] px-5 py-10 sm:px-8">
+        {/* Logo bar */}
+        <header className="flex flex-wrap items-end justify-between gap-4 border-b-2 border-ink/80 pb-5">
+          <div className="flex items-center gap-3">
+            <span className="grid h-12 w-12 place-items-center rounded-xl border-2 border-ink bg-gradient-to-br from-celeste to-violeta font-slab text-xl text-white shadow-hardsm">EL</span>
+            <div>
+              <p className="font-slab text-2xl leading-none tracking-wide text-ink sm:text-3xl">
+                ESTA <span className="bg-gradient-to-r from-celeste to-violeta bg-clip-text text-transparent">LOCURA</span>
+              </p>
+              <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.3em] text-ink2">Armá · Simulá · Ganá</p>
+            </div>
+          </div>
+          <Link href="/historial" className="rounded-full border-2 border-ink bg-bone px-4 py-2 font-mono text-[11px] uppercase tracking-[0.18em] text-ink shadow-hardsm transition hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none">
+            Historial
+          </Link>
+        </header>
 
-      <div className="mx-auto flex min-h-screen w-full max-w-5xl flex-col px-5 py-12 sm:px-8">
         {/* Hero */}
-        <section className="flex flex-col items-center text-center">
-          <p className="font-mono text-xs uppercase tracking-[0.4em] text-cyan/80">
-            Draft de selecciones &middot; Mundial 2026
-          </p>
-          <h1 className="mt-8 max-w-3xl text-5xl font-bold leading-[1.05] tracking-tight sm:text-7xl lg:text-8xl">
-            Arma tu seleccion
-            <br />
-            <span className="bg-gradient-to-r from-cyan to-emerald bg-clip-text text-transparent">
-              y conquista el Mundial
-            </span>
+        <section className="mt-10">
+          <h1 className="font-slab text-6xl uppercase leading-[0.92] tracking-tight text-ink sm:text-8xl">
+            Armá tu selección<br />y conquistá el <span className="text-vermillion">Mundial</span>
           </h1>
-          <p className="mt-6 max-w-xl text-base leading-7 text-sand/65 sm:text-lg">
-            Elegis una formacion, aparecen paises, tomas decisiones. Cada partido despues pone a
-            prueba lo que construiste. Sin relleno.
+          <p className="mt-6 max-w-xl text-base leading-7 text-ink2">
+            Elegís una formación, aparecen países, tomás decisiones. Cada partido después pone a prueba
+            lo que construiste. Sin relleno.
           </p>
 
-          <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row">
+          <div className="mt-8 flex flex-wrap gap-3">
             <Link
               href="/draft"
-              className="group relative inline-flex items-center gap-3 overflow-hidden rounded-2xl bg-gradient-to-r from-cyan to-emerald px-10 py-5 text-lg font-bold uppercase tracking-[0.15em] text-night transition-all hover:scale-[1.03] hover:shadow-[0_0_40px_-8px_rgba(0,200,200,0.4)]"
+              className="rounded-2xl border-2 border-ink bg-gradient-to-r from-celeste to-violeta px-10 py-5 font-slab text-2xl uppercase tracking-wide text-white shadow-hard transition hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none"
             >
-              <span className="relative z-10">Jugar ahora</span>
-              <span className="relative z-10 text-xl transition group-hover:translate-x-1">&rarr;</span>
-              <div className="absolute inset-0 -translate-x-full bg-white/20 transition group-hover:translate-x-0" />
+              Jugar ahora →
             </Link>
             <Link
               href="/tournament"
-              className="rounded-2xl border border-white/20 px-8 py-5 font-mono text-sm uppercase tracking-[0.25em] text-sand/70 transition hover:border-white/40 hover:text-sand"
+              className="rounded-2xl border-2 border-ink bg-bone px-8 py-5 font-slab text-xl uppercase tracking-wide text-ink shadow-hardsm transition hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none"
             >
-              Ver torneo
-            </Link>
-            <Link
-              href="/historial"
-              className="rounded-2xl border border-white/20 px-8 py-5 font-mono text-sm uppercase tracking-[0.25em] text-sand/70 transition hover:border-white/40 hover:text-sand"
-            >
-              Historial
+              La campaña
             </Link>
           </div>
         </section>
 
-        {/* Stats row */}
-        <div className="mt-16 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
-          <div className="rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-center backdrop-blur">
-            <p className="font-mono text-2xl font-bold text-cyan sm:text-3xl">{overview.counts.formations}</p>
-            <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.2em] text-sand/50">Formaciones</p>
-          </div>
-          <div className="rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-center backdrop-blur">
-            <p className="font-mono text-2xl font-bold text-cyan sm:text-3xl">{overview.counts.nationalTeams}</p>
-            <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.2em] text-sand/50">Selecciones</p>
-          </div>
-          <div className="rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-center backdrop-blur">
-            <p className="font-mono text-2xl font-bold text-emerald sm:text-3xl">{draftOverview.readyPlayers}</p>
-            <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.2em] text-sand/50">Jugadores listos</p>
-          </div>
-          <div className="rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-center backdrop-blur">
-            <p className="font-mono text-2xl font-bold text-amber sm:text-3xl">{draftOverview.blockedPlayers}</p>
-            <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.2em] text-sand/50">En espera</p>
-          </div>
+        {/* Stats */}
+        <div className="mt-12 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {[
+            { value: overview.counts.formations, label: 'Formaciones' },
+            { value: overview.counts.nationalTeams, label: 'Selecciones' },
+            { value: draftOverview.readyPlayers, label: 'Jugadores' },
+            { value: 48, label: 'Equipos' },
+          ].map((s) => (
+            <div key={s.label} className="rounded-2xl border-2 border-ink bg-bone px-5 py-5 text-center shadow-hardsm">
+              <p className="font-slab text-4xl leading-none text-ink">{s.value}</p>
+              <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.2em] text-ink2">{s.label}</p>
+            </div>
+          ))}
         </div>
 
-        {/* How it works — compact */}
-        <div className="mt-14 grid gap-4 sm:grid-cols-3">
-          <div className="rounded-2xl border border-white/10 bg-night/60 p-5">
-            <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-cyan/85">01</p>
-            <h3 className="mt-3 text-lg font-semibold">Elegi tu plan</h3>
-            <p className="mt-2 text-sm leading-6 text-sand/60">Formacion y dificultad. Despues arranca el draft.</p>
-          </div>
-          <div className="rounded-2xl border border-white/10 bg-night/60 p-5">
-            <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-cyan/85">02</p>
-            <h3 className="mt-3 text-lg font-semibold">Armá tu equipo</h3>
-            <p className="mt-2 text-sm leading-6 text-sand/60">Paises que aparecen, jugadores que elejis. Cada decision cuenta.</p>
-          </div>
-          <div className="rounded-2xl border border-white/10 bg-night/60 p-5">
-            <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-emerald/85">03</p>
-            <h3 className="mt-3 text-lg font-semibold">Gana el Mundial</h3>
-            <p className="mt-2 text-sm leading-6 text-sand/60">48 selecciones, grupos y mata-mata. Tu equipo se pone a prueba.</p>
-          </div>
-        </div>
-
-        {/* Bottom CTA */}
-        <div className="mt-14 flex flex-col items-center gap-4 rounded-[2rem] border border-white/10 bg-gradient-to-b from-white/5 to-transparent px-8 py-10 text-center backdrop-blur">
-          <p className="max-w-lg text-base leading-7 text-sand/60">
-            No hay microtransacciones, no hay espera. Arranca tu draft ahora y llega hasta la final.
-          </p>
-          <Link
-            href="/draft"
-            className="rounded-full bg-sand px-8 py-4 font-mono text-sm font-semibold uppercase tracking-[0.28em] text-night transition hover:bg-white hover:shadow-[0_0_30px_-6px_rgba(255,255,255,0.2)]"
-          >
-            Empezar a jugar
-          </Link>
+        {/* How it works */}
+        <div className="mt-10 grid gap-3 sm:grid-cols-3">
+          {[
+            { n: '01', t: 'Elegí tu plan', d: 'Formación y dificultad. Después arranca el draft.' },
+            { n: '02', t: 'Armá tu equipo', d: 'Países que aparecen, jugadores que elegís. Cada decisión cuenta.' },
+            { n: '03', t: 'Ganá el Mundial', d: '48 selecciones, grupos y mata-mata. Tu equipo se pone a prueba.' },
+          ].map((c) => (
+            <div key={c.n} className="rounded-2xl border-2 border-ink bg-bone p-5 shadow-hardsm">
+              <p className="font-slab text-2xl text-vermillion">{c.n}</p>
+              <h3 className="mt-2 font-slab text-lg uppercase tracking-wide text-ink">{c.t}</h3>
+              <p className="mt-2 text-sm leading-6 text-ink2">{c.d}</p>
+            </div>
+          ))}
         </div>
       </div>
     </main>

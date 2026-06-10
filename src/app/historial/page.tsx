@@ -10,8 +10,6 @@ function formatDate(iso: string | null) {
       day: '2-digit',
       month: 'short',
       year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
     }).format(new Date(iso))
   } catch {
     return ''
@@ -21,44 +19,37 @@ function formatDate(iso: string | null) {
 export default async function HistorialPage() {
   const sessionToken = await getOrCreateSessionToken()
   const history = await getUserTournamentHistory(sessionToken)
-
   const titles = history.filter((h) => h.isChampion).length
 
   return (
-    <main className="relative overflow-hidden">
-      <div className="absolute inset-x-0 top-0 -z-10 h-[28rem] bg-pitch blur-3xl" />
-
-      <div className="mx-auto flex min-h-screen w-full max-w-3xl flex-col px-5 py-10 sm:px-8">
-        <div className="flex items-center justify-between gap-3">
+    <main className="min-h-screen bg-paper text-ink">
+      <div className="mx-auto w-full max-w-[720px] px-4 py-8 sm:px-6">
+        <header className="flex items-end justify-between gap-4 border-b-2 border-ink/80 pb-5">
           <div>
-            <p className="font-mono text-xs uppercase tracking-[0.32em] text-cyan/90">Historial</p>
-            <h1 className="mt-3 text-4xl font-semibold leading-tight sm:text-5xl">Tus campañas</h1>
+            <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-ink2">Historial</p>
+            <h1 className="mt-2 font-slab text-5xl leading-none tracking-tight text-ink sm:text-6xl">Tus campañas</h1>
+            {history.length > 0 && (
+              <p className="mt-3 font-mono text-xs uppercase tracking-[0.16em] text-ink2">
+                {history.length} {history.length === 1 ? 'Mundial' : 'Mundiales'}
+                {titles > 0 && <> · <span className="text-gold">{titles} {titles === 1 ? 'título' : 'títulos'}</span></>}
+              </p>
+            )}
           </div>
           <Link
             href="/draft"
-            className="rounded-full bg-sand px-5 py-3 font-mono text-xs uppercase tracking-[0.25em] text-night transition hover:bg-white"
+            className="rounded-xl bg-vermillion px-5 py-3 font-slab text-base uppercase tracking-wide text-bone shadow-hardsm transition hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none"
           >
             Jugar
           </Link>
-        </div>
+        </header>
 
-        {history.length > 0 && (
-          <p className="mt-4 text-sm text-sand/60">
-            {history.length} {history.length === 1 ? 'Mundial jugado' : 'Mundiales jugados'}
-            {titles > 0 && <> · <span className="text-amber">{titles} {titles === 1 ? 'título' : 'títulos'}</span></>}
-          </p>
-        )}
-
-        <div className="mt-8 space-y-3">
+        <div className="mt-7 space-y-3">
           {history.length === 0 && (
-            <div className="rounded-3xl border border-dashed border-white/15 bg-white/5 p-8 text-center text-sm leading-7 text-sand/65">
-              Todavía no jugaste ningún Mundial. Armá tu seleccion en el draft y llegá hasta la final.
+            <div className="rounded-2xl border-2 border-dashed border-ink/30 bg-bone p-8 text-center text-sm leading-7 text-ink2">
+              Todavía no jugaste ningún Mundial. Armá tu selección y llegá hasta la final.
               <div className="mt-5">
-                <Link
-                  href="/draft"
-                  className="rounded-full bg-gradient-to-r from-cyan to-emerald px-6 py-3 font-mono text-xs font-semibold uppercase tracking-[0.25em] text-night"
-                >
-                  Empezar
+                <Link href="/draft" className="rounded-xl bg-vermillion px-6 py-3 font-slab text-base uppercase tracking-wide text-bone shadow-hardsm">
+                  Empezar →
                 </Link>
               </div>
             </div>
@@ -67,38 +58,28 @@ export default async function HistorialPage() {
           {history.map((item) => (
             <article
               key={item.tournamentId}
-              className={`flex items-center justify-between gap-4 rounded-2xl border px-5 py-4 ${
-                item.isChampion ? 'border-amber/30 bg-amber/5' : 'border-white/10 bg-night/60'
+              className={`flex items-center justify-between gap-4 rounded-2xl border-2 px-5 py-4 shadow-hardsm ${
+                item.isChampion ? 'border-ink bg-ink text-paper' : 'border-ink bg-bone text-ink'
               }`}
             >
               <div className="min-w-0">
-                <p className={`font-semibold ${item.isChampion ? 'text-amber' : 'text-sand'}`}>
+                <p className={`font-slab text-xl uppercase tracking-wide ${item.isChampion ? 'text-gold' : 'text-ink'}`}>
                   {item.outcomeLabel}
                 </p>
-                <p className="mt-1 text-sm text-sand/55">
-                  {item.isChampion ? (
-                    'Levantaste la copa'
-                  ) : (
-                    <>Campeón: <span className="text-sand/80">{item.championName ?? '—'}</span></>
-                  )}
+                <p className={`mt-1 text-sm ${item.isChampion ? 'text-paper/70' : 'text-ink2'}`}>
+                  {item.isChampion ? 'Levantaste la copa' : <>Campeón: {item.championName ?? '—'}</>}
                 </p>
               </div>
-              <div className="shrink-0 text-right">
-                <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-sand/45">
-                  {formatDate(item.playedAt)}
-                </p>
-                {item.isChampion && <p className="mt-1 text-lg">🏆</p>}
-              </div>
+              <p className={`shrink-0 font-mono text-[11px] uppercase tracking-[0.14em] ${item.isChampion ? 'text-paper/60' : 'text-ink2'}`}>
+                {formatDate(item.playedAt)}
+              </p>
             </article>
           ))}
         </div>
 
-        <div className="mt-10 flex justify-center">
-          <Link
-            href="/"
-            className="rounded-full border border-white/15 px-6 py-3 font-mono text-xs uppercase tracking-[0.25em] text-sand/60 transition hover:border-white/30"
-          >
-            Volver al inicio
+        <div className="mt-10">
+          <Link href="/" className="font-mono text-xs uppercase tracking-[0.2em] text-ink2 underline-offset-4 hover:underline">
+            ← Volver al inicio
           </Link>
         </div>
       </div>
