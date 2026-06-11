@@ -56,7 +56,8 @@ export async function POST() {
       return NextResponse.json({ error: 'No hay un torneo activo en fase de grupos.' }, { status: 404 })
     }
 
-    const { championId, humanEntryId } = await simulateSingleplayerTournament(tournament.id)
+    const { championId, humanEntryIds } = await simulateSingleplayerTournament(tournament.id)
+    const humanEntryId = humanEntryIds[0] ?? null
 
     return NextResponse.json({ simulated: true, championId, humanEntryId })
   } catch (error) {

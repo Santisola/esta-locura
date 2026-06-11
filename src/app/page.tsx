@@ -42,7 +42,13 @@ export default async function HomePage() {
               href="/draft"
               className="rounded-2xl border-2 border-ink bg-gradient-to-r from-celeste to-violeta px-10 py-5 font-slab text-2xl uppercase tracking-wide text-white shadow-hard transition hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none"
             >
-              Jugar ahora →
+              Jugar solo →
+            </Link>
+            <Link
+              href="/multiplayer"
+              className="rounded-2xl border-2 border-ink bg-gradient-to-br from-azul to-violeta px-8 py-5 font-slab text-xl uppercase tracking-wide text-white shadow-hard transition hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none"
+            >
+              Con amigos →
             </Link>
             <Link
               href="/tournament"

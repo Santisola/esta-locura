@@ -246,6 +246,8 @@ Con este enfoque, el simulador siempre consume una abstraccion comun: `equipo pa
 
 ## 10. Lobbies y sincronizacion multiplayer
 
+> **Plan de implementacion detallado:** ver [`plan-multiplayer.md`](./plan-multiplayer.md). Ese documento concreta la arquitectura definitiva del modo multijugador (draft independiente, reveal sincronizado por fase, **polling sobre Neon en lugar de PartyKit**, humanos separados en el cuadro), con schema delta, contratos de API, fases de trabajo y criterios de exito. Las secciones 10–11 de abajo quedan como vision original de referencia.
+
 ### Reglas base
 
 - Cada sala tiene host, codigo unico y configuracion comun.

@@ -13,7 +13,10 @@ import type {
   DraftSessionState,
 } from '@/features/draft/types'
 
-type DraftWorkbenchProps = DraftBootstrap
+type DraftWorkbenchProps = DraftBootstrap & {
+  roomCode?: string
+  roomDifficulty?: DraftDifficultyMode
+}
 
 const STORAGE_KEY = 'esta-locura.singleplayer-draft.v1'
 
@@ -116,15 +119,17 @@ function normalizeDraftState(state: DraftSessionState): DraftSessionState {
   }
 }
 
-export function DraftWorkbench({ formations, countries }: DraftWorkbenchProps) {
+export function DraftWorkbench({ formations, countries, roomCode, roomDifficulty }: DraftWorkbenchProps) {
   const [selectedFormationCode, setSelectedFormationCode] = useState(formations[0]?.code ?? '')
-  const [selectedDifficulty, setSelectedDifficulty] = useState<DraftDifficultyMode>('CLASSIC')
+  const [selectedDifficulty, setSelectedDifficulty] = useState<DraftDifficultyMode>(roomDifficulty ?? 'CLASSIC')
   const [draftState, setDraftState] = useState<DraftSessionState | null>(null)
   const [isHydrated, setIsHydrated] = useState(false)
   const [, setPersistenceMode] = useState<DraftPersistenceMode>('local-fallback')
   const [isFinalizing, setIsFinalizing] = useState(false)
   const [tournamentMessage, setTournamentMessage] = useState<string | null>(null)
   const [tournamentId, setTournamentId] = useState<string | null>(null)
+
+  const storageKey = roomCode ? `esta-locura.room-draft.${roomCode}.v1` : STORAGE_KEY
 
   const countriesBySlug = useMemo(
     () => Object.fromEntries(countries.map((c) => [c.countrySlug, c])), [countries],
@@ -138,17 +143,18 @@ export function DraftWorkbench({ formations, countries }: DraftWorkbenchProps) {
 
   useEffect(() => {
     async function bootstrap() {
-      const saved = window.localStorage.getItem(STORAGE_KEY)
+      const saved = window.localStorage.getItem(storageKey)
       if (saved) {
         try {
           const parsed = normalizeDraftState(JSON.parse(saved) as DraftSessionState)
           setDraftState(parsed)
           setSelectedFormationCode(parsed.formationCode)
           setSelectedDifficulty(parsed.difficulty)
-        } catch { window.localStorage.removeItem(STORAGE_KEY) }
+        } catch { window.localStorage.removeItem(storageKey) }
       }
       try {
-        const res = await fetch('/api/draft/singleplayer', { cache: 'no-store' })
+        const endpoint = roomCode ? `/api/rooms/${roomCode}/draft/save` : '/api/draft/singleplayer'
+        const res = await fetch(endpoint, { cache: 'no-store' })
         if (!res.ok) throw new Error()
         const payload = await res.json() as {
           draftState: DraftSessionState | null; persistenceMode: DraftPersistenceMode
@@ -164,26 +170,28 @@ export function DraftWorkbench({ formations, countries }: DraftWorkbenchProps) {
       setIsHydrated(true)
     }
     void bootstrap()
-  }, [])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [roomCode])
 
   useEffect(() => {
     if (!isHydrated) return
-    if (draftState) { window.localStorage.setItem(STORAGE_KEY, JSON.stringify(draftState)); return }
-    window.localStorage.removeItem(STORAGE_KEY)
-  }, [draftState, isHydrated])
+    if (draftState) { window.localStorage.setItem(storageKey, JSON.stringify(draftState)); return }
+    window.localStorage.removeItem(storageKey)
+  }, [draftState, isHydrated, storageKey])
 
   useEffect(() => {
     if (!isHydrated || !draftState) return
+    const endpoint = roomCode ? `/api/rooms/${roomCode}/draft/save` : '/api/draft/singleplayer'
     const timer = window.setTimeout(async () => {
       try {
-        await fetch('/api/draft/singleplayer', {
+        await fetch(endpoint, {
           method: 'POST', headers: { 'content-type': 'application/json' },
           body: JSON.stringify({ draftState }),
         })
       } catch { setPersistenceMode('local-fallback') }
     }, 500)
     return () => window.clearTimeout(timer)
-  }, [draftState, isHydrated])
+  }, [draftState, isHydrated, roomCode])
 
   const activeFormation = useMemo(
     () => formations.find((f) => f.code === (draftState?.formationCode ?? selectedFormationCode)) ?? formations[0],
@@ -298,7 +306,10 @@ export function DraftWorkbench({ formations, countries }: DraftWorkbenchProps) {
   }
 
   async function resetDraft() {
-    try { await fetch('/api/draft/singleplayer', { method: 'DELETE' }) } catch { /* ignore */ }
+    if (!roomCode) {
+      try { await fetch('/api/draft/singleplayer', { method: 'DELETE' }) } catch { /* ignore */ }
+    }
+    window.localStorage.removeItem(storageKey)
     setDraftState(null)
     setTournamentId(null)
     setTournamentMessage(null)
@@ -311,6 +322,31 @@ export function DraftWorkbench({ formations, countries }: DraftWorkbenchProps) {
     setIsFinalizing(true)
     setTournamentMessage(null)
     try {
+      if (roomCode) {
+        // Guardar la selección definitiva antes de finalizar: el auto-save tiene
+        // debounce, así que persistimos el estado completo de forma explícita para
+        // que finalize no marque COMPLETED sobre un snapshot viejo.
+        const finalState: DraftSessionState = {
+          ...draftState,
+          completedAt: draftState.completedAt ?? new Date().toISOString(),
+        }
+        const saveRes = await fetch(`/api/rooms/${roomCode}/draft/save`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ draftState: finalState }),
+        })
+        if (!saveRes.ok) {
+          const saveData = await readJsonSafe<{ error?: string }>(saveRes)
+          throw new Error(saveData?.error ?? `No se pudo guardar la selección (${saveRes.status}).`)
+        }
+        setDraftState(finalState)
+
+        const res = await fetch(`/api/rooms/${roomCode}/draft/finalize`, { method: 'POST' })
+        const data = await readJsonSafe<{ error?: string }>(res)
+        if (!res.ok) throw new Error(data?.error ?? `Error al finalizar el draft (${res.status}).`)
+        window.location.href = `/sala/${roomCode}`
+        return
+      }
       const res = await fetch('/api/tournaments/singleplayer', { method: 'POST' })
       const data = await readJsonSafe<{ error?: string; tournament?: { tournamentId: string } }>(res)
       if (!res.ok || !data) throw new Error(data?.error ?? `No se pudo abrir el Mundial (error ${res.status}).`)
@@ -336,13 +372,15 @@ export function DraftWorkbench({ formations, countries }: DraftWorkbenchProps) {
     <div className="space-y-5">
       {/* Header / scoreboard */}
       <header className="flex flex-wrap items-end justify-between gap-4 border-b-2 border-ink/80 pb-4">
-        <Link href="/" className="flex items-center gap-3">
+        <Link href={roomCode ? `/sala/${roomCode}` : '/'} className="flex items-center gap-3">
           <span className="grid h-12 w-12 place-items-center rounded-xl border-2 border-ink bg-gradient-to-br from-celeste to-violeta shadow-hardsm"><img src="/worldcup.svg" alt="EL" className="h-9 w-9" /></span>
           <div>
             <p className="font-slab text-2xl leading-none tracking-wide text-ink">
               ESTA <span className="bg-gradient-to-r from-celeste to-violeta bg-clip-text text-transparent">LOCURA</span>
             </p>
-            <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.3em] text-ink2">Armá · Simulá · Ganá</p>
+            <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.3em] text-ink2">
+              {roomCode ? `Sala ${roomCode}` : 'Armá · Simulá · Ganá'}
+            </p>
           </div>
         </Link>
         <div className="flex flex-wrap gap-2">
@@ -373,6 +411,8 @@ export function DraftWorkbench({ formations, countries }: DraftWorkbenchProps) {
               selectedDifficulty={activeDifficulty}
               onSelectDifficulty={setSelectedDifficulty}
               locked={Boolean(draftState)}
+              difficultyLocked={Boolean(roomCode)}
+              difficultyHint={roomCode ? 'Lo define la sala' : undefined}
             />
           )}
 
@@ -400,7 +440,12 @@ export function DraftWorkbench({ formations, countries }: DraftWorkbenchProps) {
             {draftState && isComplete && (
               <div className="space-y-3 text-center">
                 <p className="font-slab text-xl tracking-wide text-ink">ALINEACIÓN COMPLETA {filled}/{total}</p>
-                <ActionButton onClick={finalize} label={isFinalizing ? 'Abriendo...' : 'Simular el Mundial'} arrow disabled={isFinalizing} />
+                <ActionButton
+                  onClick={finalize}
+                  label={isFinalizing ? 'Guardando...' : roomCode ? 'Finalizar mi selección' : 'Simular el Mundial'}
+                  arrow
+                  disabled={isFinalizing}
+                />
                 <button onClick={resetDraft} className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink2 underline-offset-2 hover:underline">Reiniciar draft</button>
               </div>
             )}
@@ -412,7 +457,7 @@ export function DraftWorkbench({ formations, countries }: DraftWorkbenchProps) {
             )}
           </div>
 
-          {tournamentMessage && (
+          {tournamentMessage && !roomCode && (
             <div className="rounded-2xl border-2 border-grass bg-grass/10 p-4 text-center">
               <p className="text-sm font-semibold text-ink">{tournamentMessage}</p>
               {tournamentId && (
@@ -466,14 +511,17 @@ function ActionButton({ onClick, label, disabled, dice, arrow }: {
   )
 }
 
-function ConfigPanel({ formations, selectedFormationCode, onSelectFormation, selectedDifficulty, onSelectDifficulty, locked }: {
+function ConfigPanel({ formations, selectedFormationCode, onSelectFormation, selectedDifficulty, onSelectDifficulty, locked, difficultyLocked, difficultyHint }: {
   formations: DraftBootstrap['formations']
   selectedFormationCode: string
   onSelectFormation: (code: string) => void
   selectedDifficulty: DraftDifficultyMode
   onSelectDifficulty: (mode: DraftDifficultyMode) => void
   locked: boolean
+  difficultyLocked?: boolean
+  difficultyHint?: string
 }) {
+  const lockDifficulty = locked || difficultyLocked
   return (
     <div className="rounded-2xl border-2 border-ink bg-bone p-4 shadow-hardsm">
       <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-ink2">Formación</p>
@@ -495,18 +543,21 @@ function ConfigPanel({ formations, selectedFormationCode, onSelectFormation, sel
         })}
       </div>
 
-      <p className="mt-5 font-mono text-[11px] uppercase tracking-[0.24em] text-ink2">Modo · Dificultad</p>
+      <p className="mt-5 flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.24em] text-ink2">
+        <span>Modo · Dificultad</span>
+        {difficultyHint && <span className="text-[9px] tracking-[0.14em] text-ink2/60">{difficultyHint}</span>}
+      </p>
       <div className="mt-3 grid grid-cols-2 gap-2">
         {DIFFICULTY_OPTIONS.map((o) => {
           const active = o.value === selectedDifficulty
           return (
             <button
               key={o.value}
-              onClick={() => !locked && onSelectDifficulty(o.value)}
-              disabled={locked && !active}
+              onClick={() => !lockDifficulty && onSelectDifficulty(o.value)}
+              disabled={lockDifficulty && !active}
               className={`rounded-lg border-2 px-3 py-2.5 text-center font-mono text-xs uppercase tracking-[0.12em] transition ${
                 active ? 'border-ink bg-ink text-paper' : 'border-line bg-paper2 text-ink hover:border-ink/50'
-              } ${locked ? 'cursor-default' : ''}`}
+              } ${lockDifficulty ? 'cursor-default' : ''}`}
             >
               {o.label}
             </button>
