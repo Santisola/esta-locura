@@ -54,7 +54,7 @@ export async function createSingleplayerTournament(sessionToken: string) {
     humans: [
       {
         draftedTeamId: draftedTeam.id,
-        displayName: draftedTeam.displayName ?? 'Tu Seleccion Draft',
+        displayName: 'Mi Selección',
         ratings,
       },
     ],

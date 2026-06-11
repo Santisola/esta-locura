@@ -92,6 +92,13 @@ export type TournamentOverview = {
   topScorer: { name: string; goals: number } | null
 }
 
+function resolveEntryName(entryType: string, displayName: string): string {
+  if (entryType === 'HUMAN_DRAFTED' && displayName.trimStart().startsWith('{')) {
+    return 'Mi Selección'
+  }
+  return displayName
+}
+
 export async function getSingleplayerTournamentOverview(sessionToken: string): Promise<TournamentOverview | null> {
   if (!isDatabaseConfigured()) {
     return null
@@ -200,7 +207,7 @@ export async function getSingleplayerTournamentOverview(sessionToken: string): P
       return {
         rank: dbStanding?.rank ?? 0,
         entryId: entry.id,
-        name: entry.displayName,
+        name: resolveEntryName(entry.entryType, entry.displayName),
         played: dbStanding?.played ?? 0,
         wins: dbStanding?.wins ?? 0,
         draws: dbStanding?.draws ?? 0,
@@ -226,7 +233,7 @@ export async function getSingleplayerTournamentOverview(sessionToken: string): P
       code,
       entries: groupEntries.map((e) => ({
         id: e.id,
-        name: e.displayName,
+        name: resolveEntryName(e.entryType, e.displayName),
         type: e.entryType as 'HUMAN_DRAFTED' | 'REAL_TEAM',
         ovr: e.computedOvr,
       })),
@@ -238,8 +245,8 @@ export async function getSingleplayerTournamentOverview(sessionToken: string): P
         groupCode: m.groupCode,
         homeEntryId: m.homeEntryId,
         awayEntryId: m.awayEntryId,
-        homeName: entryMap[m.homeEntryId]?.displayName ?? 'Local',
-        awayName: entryMap[m.awayEntryId]?.displayName ?? 'Visitante',
+        homeName: entryMap[m.homeEntryId] ? resolveEntryName(entryMap[m.homeEntryId].entryType, entryMap[m.homeEntryId].displayName) : 'Local',
+        awayName: entryMap[m.awayEntryId] ? resolveEntryName(entryMap[m.awayEntryId].entryType, entryMap[m.awayEntryId].displayName) : 'Visitante',
         homeScore: m.homeScore,
         awayScore: m.awayScore,
         homePenalties: m.homePenalties,
@@ -271,8 +278,8 @@ export async function getSingleplayerTournamentOverview(sessionToken: string): P
         round: m.round,
         homeEntryId: m.homeEntryId,
         awayEntryId: m.awayEntryId,
-        homeName: entryMap[m.homeEntryId]?.displayName ?? '?',
-        awayName: entryMap[m.awayEntryId]?.displayName ?? '?',
+        homeName: entryMap[m.homeEntryId] ? resolveEntryName(entryMap[m.homeEntryId].entryType, entryMap[m.homeEntryId].displayName) : '?',
+        awayName: entryMap[m.awayEntryId] ? resolveEntryName(entryMap[m.awayEntryId].entryType, entryMap[m.awayEntryId].displayName) : '?',
         homeScore: m.homeScore,
         awayScore: m.awayScore,
         homePenalties: m.homePenalties,
@@ -293,7 +300,9 @@ export async function getSingleplayerTournamentOverview(sessionToken: string): P
   const isSimulated = allMatches.some((m) => m.status === 'FINISHED')
 
   const championEntryId = tournament.championEntryId
-  const championName = championEntryId ? entryMap[championEntryId]?.displayName ?? null : null
+  const championName = championEntryId && entryMap[championEntryId]
+    ? resolveEntryName(entryMap[championEntryId].entryType, entryMap[championEntryId].displayName)
+    : null
   const humanEntry = allEntries.find((e) => e.entryType === 'HUMAN_DRAFTED')
 
   return {
