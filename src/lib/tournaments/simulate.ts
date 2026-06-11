@@ -22,15 +22,14 @@ function seedForMatch(parts: string): number {
   return Math.abs(parts.split('').reduce((h, c) => (h * 31 + c.charCodeAt(0)) | 0, 0))
 }
 
-// Simula por completo un torneo singleplayer ya creado (entries y grupos en DB) y
-// persiste posiciones, resultados, eventos y bracket. Deja el torneo en FINISHED.
-// Reutilizable desde la creacion del torneo y desde /api/tournaments/simulate.
+// Simula por completo un torneo ya creado (entries y grupos en DB) y persiste
+// posiciones, resultados, eventos y bracket. Deja el torneo en FINISHED.
+// Soporta N entradas HUMAN_DRAFTED (singleplayer con N=1, multiplayer con N>1).
+// Reutilizable desde createTournament y desde /api/tournaments/simulate.
 //
-// Es idempotente: borra standings y partidos previos del torneo antes de
-// reconstruirlos. Toda la persistencia se hace con bulk inserts (pocas idas a la
-// base): los partidos —de grupo y eliminatorios— se INSERTAN ya con su resultado,
-// usando el orden local/visitante del simulador (no hay updates ni flips de side).
-export async function simulateSingleplayerTournament(tournamentId: string) {
+// Es idempotente: borra standings y partidos previos antes de reconstruirlos.
+// Toda la persistencia ocurre en un único db.batch() atómico.
+export async function simulateTournament(tournamentId: string) {
   const db = getDb()
 
   const allEntries = await db.query.tournamentEntries.findMany({
@@ -59,20 +58,25 @@ export async function simulateSingleplayerTournament(tournamentId: string) {
     rosterByNationalTeam.set(teamId, buildTeamRoster(roster))
   }
 
-  // Roster del equipo humano a partir de sus jugadores drafteados.
-  const humanEntry = allEntries.find((entry) => entry.entryType === 'HUMAN_DRAFTED')
-  let humanRoster: TeamRoster | undefined
-  if (humanEntry?.draftedTeamId) {
-    const humanPlayers = await db
-      .select({ name: players.name, primaryPosition: players.primaryPosition })
-      .from(draftedTeamPlayers)
-      .innerJoin(players, eq(draftedTeamPlayers.playerId, players.id))
-      .where(eq(draftedTeamPlayers.draftedTeamId, humanEntry.draftedTeamId))
-    humanRoster = buildTeamRoster(humanPlayers)
-  }
+  // Roster de CADA entry humana (N>=1). Se carga en paralelo.
+  const humanEntries = allEntries.filter((entry) => entry.entryType === 'HUMAN_DRAFTED')
+  const humanRosterByEntryId = new Map<string, TeamRoster>()
+
+  await Promise.all(
+    humanEntries
+      .filter((entry) => entry.draftedTeamId != null)
+      .map(async (entry) => {
+        const humanPlayers = await db
+          .select({ name: players.name, primaryPosition: players.primaryPosition })
+          .from(draftedTeamPlayers)
+          .innerJoin(players, eq(draftedTeamPlayers.playerId, players.id))
+          .where(eq(draftedTeamPlayers.draftedTeamId, entry.draftedTeamId!))
+        humanRosterByEntryId.set(entry.id, buildTeamRoster(humanPlayers))
+      }),
+  )
 
   const rosterForEntry = (entry: (typeof allEntries)[number]): TeamRoster | undefined => {
-    if (entry.entryType === 'HUMAN_DRAFTED') return humanRoster
+    if (entry.entryType === 'HUMAN_DRAFTED') return humanRosterByEntryId.get(entry.id)
     if (entry.nationalTeamId) return rosterByNationalTeam.get(entry.nationalTeamId)
     return undefined
   }
@@ -206,6 +210,9 @@ export async function simulateSingleplayerTournament(tournamentId: string) {
 
   return {
     championId: result.championId,
-    humanEntryId: humanEntry?.id ?? null,
+    humanEntryIds: humanEntries.map((e) => e.id),
   }
 }
+
+// Alias de compatibilidad para call-sites del singleplayer.
+export const simulateSingleplayerTournament = simulateTournament

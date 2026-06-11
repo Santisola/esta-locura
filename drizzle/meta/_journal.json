@@ -15,6 +15,20 @@
       "when": 1781046809507,
       "tag": "0001_silly_leader",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1781144453234,
+      "tag": "0002_watery_fantastic_four",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1749513600000,
+      "tag": "0003_separate_humans",
+      "breakpoints": true
     }
   ]
 }

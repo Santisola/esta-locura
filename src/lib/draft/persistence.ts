@@ -1,6 +1,6 @@
 import 'server-only'
 
-import { eq } from 'drizzle-orm'
+import { and, eq, isNull } from 'drizzle-orm'
 
 import type { DraftSessionState } from '@/features/draft/types'
 import { getDb, isDatabaseConfigured } from '@/lib/db/client'
@@ -86,7 +86,7 @@ async function syncDraftedTeamPlayers(draftedTeamId: string, draftState: DraftSe
   }
 }
 
-export async function loadDraftSnapshot(sessionToken: string): Promise<PersistedDraftSnapshot> {
+export async function loadDraftSnapshot(sessionToken: string, roomId?: string): Promise<PersistedDraftSnapshot> {
   if (!isDatabaseConfigured()) {
     const memoryDraft = getMemoryDraft(sessionToken)
 
@@ -100,8 +100,11 @@ export async function loadDraftSnapshot(sessionToken: string): Promise<Persisted
   try {
     const user = await ensureGuestUser(sessionToken)
     const db = getDb()
+    const whereClause = roomId
+      ? and(eq(draftedTeams.userId, user.id), eq(draftedTeams.roomId, roomId))
+      : and(eq(draftedTeams.userId, user.id), isNull(draftedTeams.roomId))
     const existingDraft = await db.query.draftedTeams.findFirst({
-      where: eq(draftedTeams.userId, user.id),
+      where: whereClause,
       orderBy: (table, { desc }) => [desc(table.updatedAt)],
     })
 
@@ -121,7 +124,7 @@ export async function loadDraftSnapshot(sessionToken: string): Promise<Persisted
   }
 }
 
-export async function saveDraftSnapshot(sessionToken: string, draftState: DraftSessionState) {
+export async function saveDraftSnapshot(sessionToken: string, draftState: DraftSessionState, roomId?: string) {
   if (!isDatabaseConfigured()) {
     const stored = setMemoryDraft(sessionToken, draftState)
 
@@ -142,8 +145,11 @@ export async function saveDraftSnapshot(sessionToken: string, draftState: DraftS
       throw new Error(`No existe la formacion ${draftState.formationCode} en la base.`)
     }
 
+    const whereClause = roomId
+      ? and(eq(draftedTeams.userId, user.id), eq(draftedTeams.roomId, roomId))
+      : and(eq(draftedTeams.userId, user.id), isNull(draftedTeams.roomId))
     const existingDraft = await db.query.draftedTeams.findFirst({
-      where: eq(draftedTeams.userId, user.id),
+      where: whereClause,
       orderBy: (table, { desc }) => [desc(table.updatedAt)],
     })
 
@@ -161,6 +167,7 @@ export async function saveDraftSnapshot(sessionToken: string, draftState: DraftS
         .insert(draftedTeams)
         .values({
           userId: user.id,
+          roomId: roomId ?? null,
           ...payload,
           createdAt: new Date(),
         })
