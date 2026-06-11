@@ -12,7 +12,9 @@ export default async function HomePage() {
         {/* Logo bar */}
         <header className="flex flex-wrap items-end justify-between gap-4 border-b-2 border-ink/80 pb-5">
           <div className="flex items-center gap-3">
-            <span className="grid h-12 w-12 place-items-center rounded-xl border-2 border-ink bg-gradient-to-br from-celeste to-violeta font-slab text-xl text-white shadow-hardsm">EL</span>
+            <span className="grid h-12 w-12 place-items-center rounded-xl border-2 border-ink bg-gradient-to-br from-celeste to-violeta shadow-hardsm">
+              <img src="/worldcup.svg" alt="EL" className="h-9 w-9" />
+            </span>
             <div>
               <p className="font-slab text-2xl leading-none tracking-wide text-ink sm:text-3xl">
                 ESTA <span className="bg-gradient-to-r from-celeste to-violeta bg-clip-text text-transparent">LOCURA</span>
