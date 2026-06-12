@@ -443,6 +443,13 @@ export function DraftWorkbench({ formations, countries, roomCode, roomDifficulty
               </div>
             )}
 
+            {draftState && !isComplete && currentCountry && (
+              <div className="flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.18em] text-ink2">
+                <span>{filled}/{total} puestos</span>
+                <button onClick={resetDraft} className="underline-offset-2 hover:underline">Reiniciar</button>
+              </div>
+            )}
+
             {draftState && isComplete && (
               <div className="space-y-3 text-center">
                 <p className="font-slab text-xl tracking-wide text-ink">ALINEACIÓN COMPLETA {filled}/{total}</p>

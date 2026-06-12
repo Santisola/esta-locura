@@ -120,7 +120,10 @@ const COUNTRY_CODE_BY_COUNTRY = {
 }
 
 const rawPlayers = JSON.parse(await fs.readFile(PLAYERS_PATH, 'utf8'))
-const readyPlayers = rawPlayers.filter((player) => player.enrichmentStatus === 'matched')
+// Antes se filtraba por enrichmentStatus === 'matched', pero las pasadas
+// posteriores del pipeline (fc25/fc26/imputed) completaron ratings para todos:
+// filtrar por status dejaba ~166 jugadores sin seedear o congelados en DB.
+const readyPlayers = rawPlayers.filter((player) => Number.isFinite(player.ovr))
 
 const grouped = new Map()
 
