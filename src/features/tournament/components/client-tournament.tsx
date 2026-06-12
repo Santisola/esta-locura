@@ -235,32 +235,94 @@ function Metric({ value, label }: { value: number; label: string }) {
   )
 }
 
+const KO_ROUND_LABEL: Record<string, string> = {
+  ROUND_OF_32: 'Dieciseisavos de final',
+  ROUND_OF_16: 'Octavos de final',
+  QUARTER_FINAL: 'Cuartos de final',
+  SEMI_FINAL: 'Semifinales',
+  FINAL: 'Final',
+}
+
 function WorldDetail({ tournament }: { tournament: TournamentOverview }) {
   const humanId = tournament.humanEntryId
+
+  const koRounds = ['ROUND_OF_32', 'ROUND_OF_16', 'QUARTER_FINAL', 'SEMI_FINAL', 'FINAL'] as const
+
   return (
     <details className="group animate-fadeUp rounded-2xl border-2 border-ink bg-bone shadow-hardsm">
       <summary className="cursor-pointer list-none px-5 py-4 font-slab text-lg uppercase tracking-wide text-ink">
         El resto del Mundial <span className="float-right font-mono text-sm text-ink2 group-open:rotate-180">▾</span>
       </summary>
       <div className="space-y-6 border-t-2 border-ink/10 px-5 py-5">
-        <div className="grid gap-4 sm:grid-cols-2">
-          {tournament.groups.map((g) => (
-            <div key={g.code} className="rounded-xl border border-line bg-paper2 p-3">
-              <p className="mb-2 font-slab text-sm uppercase tracking-wide text-ink">Grupo {g.code}</p>
-              <ul className="space-y-1">
-                {g.standings.map((s) => (
-                  <li
-                    key={s.entryId}
-                    className={`flex items-center justify-between text-xs ${s.entryId === humanId ? 'font-bold text-vermillion' : s.rank <= 2 ? 'text-ink' : 'text-ink2'}`}
-                  >
-                    <span className="truncate">{s.rank}. {s.name}</span>
-                    <span className="ml-2 shrink-0 font-mono">{s.points} pts</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+
+        {/* Campeón */}
+        {tournament.championName && (
+          <div className="rounded-xl border-2 border-gold bg-gold/10 px-5 py-4 text-center">
+            <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-gold/70">Campeón del mundo</p>
+            <p className="mt-1 font-slab text-2xl uppercase tracking-wide text-gold">🏆 {tournament.championName}</p>
+          </div>
+        )}
+
+        {/* Fase de grupos */}
+        <div>
+          <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.22em] text-ink2/60">Fase de grupos</p>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {tournament.groups.map((g) => (
+              <div key={g.code} className="rounded-xl border border-line bg-paper2 p-3">
+                <p className="mb-2 font-slab text-sm uppercase tracking-wide text-ink">Grupo {g.code}</p>
+                <ul className="space-y-1">
+                  {g.standings.map((s) => (
+                    <li
+                      key={s.entryId}
+                      className={`flex items-center justify-between text-xs ${s.entryId === humanId ? 'font-bold text-vermillion' : s.rank <= 2 ? 'text-ink' : 'text-ink2'}`}
+                    >
+                      <span className="truncate">{s.rank}. {s.name}</span>
+                      <span className="ml-2 shrink-0 font-mono">{s.points} pts</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
         </div>
+
+        {/* Rondas eliminatorias */}
+        {koRounds.map((round) => {
+          const roundMatches = tournament.knockoutMatches.filter((m) => m.round === round)
+          if (roundMatches.length === 0) return null
+          return (
+            <div key={round}>
+              <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.22em] text-ink2/60">
+                {KO_ROUND_LABEL[round]}
+              </p>
+              <div className="space-y-1.5">
+                {roundMatches.map((m) => {
+                  const homeIsHuman = m.homeEntryId === humanId
+                  const awayIsHuman = m.awayEntryId === humanId
+                  const homeWon = m.winnerId === m.homeEntryId
+                  const awayWon = m.winnerId === m.awayEntryId
+                  return (
+                    <div key={m.id} className="flex items-center gap-2 rounded-lg border border-line bg-paper2 px-3 py-2 text-xs">
+                      <span className={`flex-1 truncate ${homeIsHuman ? 'font-bold text-vermillion' : homeWon ? 'text-ink' : 'text-ink2/50'}`}>
+                        {m.homeName}
+                      </span>
+                      <span className="shrink-0 font-mono font-semibold text-ink">
+                        {m.homeScore} – {m.awayScore}
+                        {m.wentToPenalties && (
+                          <span className="ml-1 text-ink2/60">({m.homePenalties}-{m.awayPenalties}p)</span>
+                        )}
+                      </span>
+                      <span className={`flex-1 truncate text-right ${awayIsHuman ? 'font-bold text-vermillion' : awayWon ? 'text-ink' : 'text-ink2/50'}`}>
+                        {m.awayName}
+                      </span>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )
+        })}
+
       </div>
     </details>
   )

@@ -28,7 +28,7 @@ const DIFFICULTY_OPTIONS: Array<{ value: DraftDifficultyMode; label: string }> =
 // Etiquetas de posición estilo planilla (español).
 const POS_LABEL: Record<string, string> = {
   GK: 'POR', LB: 'LI', RB: 'LD', CB: 'DFC', SW: 'LIB', LWB: 'CAI', RWB: 'CAD',
-  CDM: 'MCD', CM: 'MC', CAM: 'MEI', LM: 'EI', RM: 'ED',
+  CDM: 'MCD', CM: 'MC', CAM: 'MEI', LM: 'MI', RM: 'MD',
   LW: 'EI', RW: 'ED', ST: 'DC', CF: 'DC', LF: 'DC', RF: 'DC',
 }
 
@@ -47,8 +47,7 @@ const TIER: Record<string, number> = {
   GK: 0,
   CB: 1, LB: 1, RB: 1, SW: 1, LWB: 1, RWB: 1,
   CDM: 2,
-  CM: 3, LM: 3, RM: 3,
-  CAM: 4,
+  CM: 3, LM: 3, RM: 3, CAM: 3,
   LW: 5, RW: 5, ST: 5, CF: 5, LF: 5, RF: 5,
 }
 // Flanco horizontal: negativo = izquierda de la pantalla, positivo = derecha.

@@ -210,9 +210,13 @@ export function RoomLobby({ state, me, onRefresh }: Props) {
           {error && <p className="text-center text-sm font-semibold text-vermillion">{error}</p>}
         </div>
 
-        <div className="mt-8 text-center">
+        <div className="mt-8 flex items-center justify-center gap-6">
           <a href="/multiplayer" className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink2 underline-offset-2 hover:underline">
             ← Salir de la sala
+          </a>
+          <span className="text-ink2/30 font-mono text-[11px]">·</span>
+          <a href="/" className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink2 underline-offset-2 hover:underline">
+            Inicio
           </a>
         </div>
       </div>

@@ -27,7 +27,7 @@ const ROUND_LABEL: Record<string, string> = {
 }
 const POS_LABEL: Record<string, string> = {
   GK: 'POR', LB: 'LI', RB: 'LD', CB: 'DFC', SW: 'LIB', LWB: 'CAI', RWB: 'CAD',
-  CDM: 'MCD', CM: 'MC', CAM: 'MEI', LM: 'EI', RM: 'ED',
+  CDM: 'MCD', CM: 'MC', CAM: 'MEI', LM: 'MI', RM: 'MD',
   LW: 'EI', RW: 'ED', ST: 'DC', CF: 'DC', LF: 'DC', RF: 'DC',
 }
 const LANE_RANK: Record<string, number> = {
