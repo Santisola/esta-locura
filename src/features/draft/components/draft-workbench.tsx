@@ -275,9 +275,16 @@ export function DraftWorkbench({ formations, countries, roomCode, roomDifficulty
   function startDraft() {
     setTournamentId(null)
     setTournamentMessage(null)
+    // Calcular el primer slug al arrancar para evitar el click extra en "Tirar"
+    const formation = formations.find((f) => f.code === selectedFormationCode) ?? formations[0]
+    const allSlotCodes = formation?.slots.map((s) => s.code) ?? []
+    const initialPlayable = countries.filter((c) =>
+      c.players.some((p) => p.isDataReady && getCompatibleSlots(p, allSlotCodes).length > 0),
+    )
+    const slug = pickRandom(initialPlayable)
     setDraftState({
       formationCode: selectedFormationCode, difficulty: selectedDifficulty,
-      rerollsLeft: 3, currentCountrySlug: null, usedCountrySlugs: [],
+      rerollsLeft: 3, currentCountrySlug: slug, usedCountrySlugs: slug ? [slug] : [],
       picks: {}, usedPlayerIds: [], startedAt: new Date().toISOString(), completedAt: null,
     })
   }

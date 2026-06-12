@@ -121,7 +121,7 @@ const BASE_GOALS = 1.35
 // de 1; este exponente expande esa diferencia. Con 3 el favorito gana lo
 // esperado según la brecha de media (parejos: sorpresa habitual; brecha grande:
 // sorpresa rara). Un valor bajo (ej. 1.25) hacía que las medias casi no pesaran.
-const ATTACK_EXPONENT = 3
+const ATTACK_EXPONENT = 3.25
 
 // Fuerza ofensiva de un equipo: el ataque manda, el mediocampo alimenta.
 function attackingStrength(team: TeamStats): number {

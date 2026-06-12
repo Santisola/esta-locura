@@ -6,7 +6,14 @@ import { getSessionTokenReadOnly } from '@/lib/draft/session-token'
 import { rooms } from '@/lib/db/schema'
 import { getUserBySession } from '@/lib/rooms/queries'
 
-const MAX_STAGE_INDEX = 5
+// Índices de fase:
+// -1: nada | 0: grupos
+// 1: preview R32 | 2: resultados R32
+// 3: preview R16 | 4: resultados R16
+// 5: preview QF  | 6: resultados QF
+// 7: preview SF  | 8: resultados SF
+// 9: preview Final | 10: resultados Final → FINISHED
+const MAX_STAGE_INDEX = 10
 
 // POST /api/rooms/[code]/advance — solo host.
 // Incrementa revealStageIndex en 1. Si llega a MAX_STAGE_INDEX → sala FINISHED.

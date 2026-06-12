@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { RoomState, ParticipantState } from '@/lib/rooms/queries'
 import type { RoomTournamentOverview } from '@/lib/tournaments/room-overview'
+import { GoldenConfetti } from '@/components/golden-confetti'
 
 type Props = {
   state: RoomState
@@ -10,23 +11,32 @@ type Props = {
   onRefresh: () => void
 }
 
-// Etiquetas de fase de revelado (-1 a 5). Nomenclatura correcta en español:
-// ROUND_OF_32 = 16avos · ROUND_OF_16 = octavos · QF = cuartos.
+// -1: nada | 0: grupos
+// 1: cruces R32 | 2: resultados R32
+// 3: cruces R16 | 4: resultados R16
+// 5: cruces QF  | 6: resultados QF
+// 7: cruces SF  | 8: resultados SF
+// 9: cruce Final | 10: resultado Final
 const STAGE_LABELS: Record<number, string> = {
   [-1]: 'El Mundial está por empezar',
   [0]: 'Fase de grupos',
-  [1]: '16avos de final',
-  [2]: 'Octavos de final',
-  [3]: 'Cuartos de final',
-  [4]: 'Semifinales',
-  [5]: 'Final',
+  [1]: 'Cruces de 16avos',
+  [2]: '16avos de final',
+  [3]: 'Cruces de octavos',
+  [4]: 'Octavos de final',
+  [5]: 'Cruces de cuartos',
+  [6]: 'Cuartos de final',
+  [7]: 'Cruces de semis',
+  [8]: 'Semifinales',
+  [9]: 'Cruce de la Final',
+  [10]: 'Final',
 }
 
 const KO_ROUND_LABEL: Record<string, string> = {
-  ROUND_OF_32: '16avos',
-  ROUND_OF_16: 'Octavos',
-  QUARTER_FINAL: 'Cuartos',
-  SEMI_FINAL: 'Semis',
+  ROUND_OF_32: '16avos de final',
+  ROUND_OF_16: 'Octavos de final',
+  QUARTER_FINAL: 'Cuartos de final',
+  SEMI_FINAL: 'Semifinales',
   FINAL: 'Final',
 }
 
@@ -39,8 +49,31 @@ const KO_ROUND_FULL: Record<string, string> = {
   FINAL: 'la final',
 }
 
+// Qué sección scrollear según el índice revelado
+const STAGE_TO_SCROLL_TARGET: Record<number, string> = {
+  0: 'groups',
+  1: 'ROUND_OF_32', 2: 'ROUND_OF_32',
+  3: 'ROUND_OF_16', 4: 'ROUND_OF_16',
+  5: 'QUARTER_FINAL', 6: 'QUARTER_FINAL',
+  7: 'SEMI_FINAL', 8: 'SEMI_FINAL',
+  9: 'FINAL', 10: 'FINAL',
+}
+
+// Avanzar desde -1: el botón dice "Arrancar"
+// Desde 0 en adelante el botón anuncia la siguiente fase
+function nextStageLabel(currentIdx: number): string {
+  if (currentIdx === -1) return 'Arrancar el Mundial'
+  const next = currentIdx + 1
+  const label = STAGE_LABELS[next]
+  if (!label) return 'Siguiente fase'
+  // Distinguir entre "revelar cruces" (impares) y "revelar resultados" (pares ≥ 2)
+  if (next % 2 === 1) return `Mostrar cruces — ${label}`
+  return `Revelar resultados — ${label}`
+}
+
 export function RoomTournament({ state, me, onRefresh }: Props) {
   const [overview, setOverview] = useState<RoomTournamentOverview | null>(null)
+  const [ovLoading, setOvLoading] = useState(false)
   const [advancing, setAdvancing] = useState(false)
   const [restarting, setRestarting] = useState(false)
   const [ovError, setOvError] = useState<string | null>(null)
@@ -49,13 +82,43 @@ export function RoomTournament({ state, me, onRefresh }: Props) {
   const revealIdx = state.revealStageIndex
   const isFinished = state.status === 'FINISHED'
 
+  // Ref por sección para auto-scroll preciso
+  const roundRefs = useRef<Record<string, HTMLDivElement | null>>({
+    groups: null,
+    ROUND_OF_32: null,
+    ROUND_OF_16: null,
+    QUARTER_FINAL: null,
+    SEMI_FINAL: null,
+    FINAL: null,
+  })
+  // Inicializado con el índice actual para no scrollear en la carga inicial
+  const prevRevealRef = useRef<number>(revealIdx)
+
   useEffect(() => {
     if (revealIdx < 0) return
+    setOvLoading(true)
     fetch(`/api/rooms/${state.code}/tournament`)
       .then((r) => r.json())
-      .then((d) => setOverview(d))
+      .then((d) => {
+        setOverview(d)
+      })
       .catch(() => {})
+      .finally(() => setOvLoading(false))
   }, [state.code, revealIdx])
+
+  // Auto-scroll a la sección nueva cuando la fase cambia.
+  // Solo scrollea cuando el overview ya refleja el revealIdx actual (no el anterior).
+  useEffect(() => {
+    if (!overview) return
+    if (overview.revealStageIndex !== revealIdx) return // overview todavía desactualizado
+    if (revealIdx === prevRevealRef.current) return     // ya scrolleamos para este índice
+    prevRevealRef.current = revealIdx
+    const target = STAGE_TO_SCROLL_TARGET[revealIdx]
+    if (!target) return
+    setTimeout(() => {
+      roundRefs.current[target]?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 150)
+  }, [overview, revealIdx])
 
   async function advance() {
     setAdvancing(true)
@@ -155,9 +218,17 @@ export function RoomTournament({ state, me, onRefresh }: Props) {
           </div>
         )}
 
+        {/* Indicador de carga entre fases */}
+        {ovLoading && (
+          <div className="mt-6 flex items-center justify-center gap-3 rounded-2xl border-2 border-ink/20 bg-bone py-6 shadow-hardsm">
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-ink border-t-transparent" />
+            <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink2">Cargando siguiente fase…</p>
+          </div>
+        )}
+
         {/* Grupos (revelados) */}
-        {overview && revealIdx >= 0 && overview.groups.length > 0 && (
-          <div className="mt-6 space-y-3">
+        {!ovLoading && overview && revealIdx >= 0 && overview.groups.length > 0 && (
+          <div ref={(el) => { roundRefs.current.groups = el }} className="mt-6 space-y-3">
             <h2 className="font-slab text-xl uppercase tracking-wide text-ink">Fase de grupos</h2>
             <div className="grid gap-3 sm:grid-cols-2">
               {overview.groups.map((group) => {
@@ -192,47 +263,108 @@ export function RoomTournament({ state, me, onRefresh }: Props) {
           </div>
         )}
 
-        {/* Bracket KO (revelado) */}
-        {overview && overview.knockoutMatches.length > 0 && (
+        {/* Bracket KO */}
+        {!ovLoading && overview && overview.knockoutMatches.length > 0 && (
           <div className="mt-6 space-y-3">
             <h2 className="font-slab text-xl uppercase tracking-wide text-ink">Eliminatorias</h2>
-            <div className="space-y-2">
+            <div className="space-y-4">
               {(['ROUND_OF_32', 'ROUND_OF_16', 'QUARTER_FINAL', 'SEMI_FINAL', 'FINAL'] as const).map(
                 (round) => {
                   const roundMatches = overview.knockoutMatches.filter((m) => m.round === round)
                   if (roundMatches.length === 0) return null
+                  const scoresShown = roundMatches[0].showScores
                   return (
-                    <div key={round} className="space-y-1.5">
-                      <p className="pt-2 font-mono text-[10px] uppercase tracking-[0.2em] text-ink2/70">
-                        {KO_ROUND_LABEL[round]}
-                      </p>
+                    <div key={round} ref={(el) => { roundRefs.current[round] = el }} className="space-y-1.5">
+                      <div className="flex items-center gap-3 pt-2">
+                        <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink2/70">
+                          {KO_ROUND_LABEL[round]}
+                        </p>
+                        {!scoresShown && (
+                          <span className="rounded bg-celeste/20 px-2 py-0.5 font-mono text-[9px] uppercase tracking-wide text-celeste">
+                            Cruces confirmados
+                          </span>
+                        )}
+                      </div>
                       {roundMatches.map((m) => {
                         const homeIsHuman = overview.humans.some((h) => h.entryId === m.homeEntryId)
                         const awayIsHuman = overview.humans.some((h) => h.entryId === m.awayEntryId)
+                        const homeWon = m.showScores && m.winnerId === m.homeEntryId
+                        const awayWon = m.showScores && m.winnerId === m.awayEntryId
+                        const isMyMatch = overview.myEntryId != null && (
+                          m.homeEntryId === overview.myEntryId || m.awayEntryId === overview.myEntryId
+                        )
+                        const borderClass = isMyMatch
+                          ? 'border-violeta'
+                          : homeIsHuman || awayIsHuman
+                          ? 'border-celeste'
+                          : 'border-ink'
+
                         return (
                           <div
                             key={m.id}
-                            className={`flex items-center gap-2 rounded-lg border-2 px-3 py-2 text-sm shadow-hardsm ${
-                              m.isHumanDerby ? 'border-violeta bg-bone' : 'border-ink bg-bone'
-                            }`}
+                            className={`rounded-lg border-2 px-3 py-2 shadow-hardsm bg-bone ${borderClass}`}
                           >
-                            {m.isHumanDerby && (
-                              <span className="shrink-0 rounded bg-gradient-to-r from-celeste to-violeta px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-wide text-white">
-                                Derby
-                              </span>
-                            )}
-                            <span className={`flex-1 truncate ${homeIsHuman ? 'font-bold text-violeta' : 'text-ink'}`}>
-                              {m.homeName}
-                            </span>
-                            <span className="shrink-0 font-slab text-ink">
-                              {m.homeScore} – {m.awayScore}
-                              {m.wentToPenalties && (
-                                <span className="ml-1 font-mono text-[9px] uppercase text-ink2/60">pen</span>
+                            {/* Fila principal: nombre · marcador · nombre */}
+                            <div className="flex items-center gap-2 text-sm">
+                              {m.isHumanDerby && (
+                                <span className="shrink-0 rounded bg-gradient-to-r from-celeste to-violeta px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-wide text-white">
+                                  Derby
+                                </span>
                               )}
-                            </span>
-                            <span className={`flex-1 truncate text-right ${awayIsHuman ? 'font-bold text-violeta' : 'text-ink'}`}>
-                              {m.awayName}
-                            </span>
+                              <span
+                                className={`flex-1 truncate font-medium ${
+                                  !m.showScores
+                                    ? homeIsHuman ? 'font-bold text-violeta' : 'text-ink'
+                                    : homeWon
+                                    ? homeIsHuman ? 'font-bold text-violeta' : 'font-bold text-ink'
+                                    : 'text-ink2/40'
+                                }`}
+                              >
+                                {m.homeName}
+                              </span>
+
+                              {/* Marcador central */}
+                              <div className="shrink-0 text-center">
+                                {m.showScores ? (
+                                  <>
+                                    <span className="font-slab text-ink">
+                                      {m.homeScore} – {m.awayScore}
+                                    </span>
+                                    {m.wentToPenalties && (
+                                      <div className="mt-0.5 font-mono text-[10px] font-semibold text-ink2">
+                                        pen. {m.homePenalties}–{m.awayPenalties}
+                                      </div>
+                                    )}
+                                  </>
+                                ) : (
+                                  <span className="font-mono text-[11px] uppercase tracking-wide text-ink2/50">vs</span>
+                                )}
+                              </div>
+
+                              <span
+                                className={`flex-1 truncate text-right font-medium ${
+                                  !m.showScores
+                                    ? awayIsHuman ? 'font-bold text-violeta' : 'text-ink'
+                                    : awayWon
+                                    ? awayIsHuman ? 'font-bold text-violeta' : 'font-bold text-ink'
+                                    : 'text-ink2/40'
+                                }`}
+                              >
+                                {m.awayName}
+                              </span>
+                            </div>
+
+                            {/* Detalle de penales: tanda de kicks */}
+                            {m.showScores && m.wentToPenalties && (
+                              <PenaltyDetail
+                                homeName={m.homeName}
+                                awayName={m.awayName}
+                                homePenalties={m.homePenalties ?? 0}
+                                awayPenalties={m.awayPenalties ?? 0}
+                                homeWon={homeWon}
+                                events={m.events}
+                              />
+                            )}
                           </div>
                         )
                       })}
@@ -242,6 +374,11 @@ export function RoomTournament({ state, me, onRefresh }: Props) {
               )}
             </div>
           </div>
+        )}
+
+        {/* Confetti si el jugador actual ganó el torneo */}
+        {isFinished && overview?.championEntryId && overview.championEntryId === overview.myEntryId && (
+          <GoldenConfetti />
         )}
 
         {/* Campeón final */}
@@ -254,18 +391,13 @@ export function RoomTournament({ state, me, onRefresh }: Props) {
 
         {/* Controles */}
         <div className="mt-6 space-y-3 border-t-2 border-ink/15 pt-5">
-          {/* Avance de fase (mientras no terminó) */}
           {isHost && !isFinished && (
             <button
               onClick={advance}
-              disabled={advancing}
+              disabled={advancing || ovLoading}
               className="w-full rounded-xl border-2 border-ink bg-gradient-to-r from-celeste to-violeta px-5 py-4 font-slab text-lg uppercase tracking-wide text-white shadow-hardsm transition hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
             >
-              {advancing
-                ? 'Avanzando…'
-                : revealIdx === -1
-                ? 'Arrancar el Mundial'
-                : `Revelar ${STAGE_LABELS[(revealIdx + 1) as keyof typeof STAGE_LABELS] ?? 'siguiente fase'}`}
+              {advancing ? 'Avanzando…' : nextStageLabel(revealIdx)}
             </button>
           )}
           {!isHost && !isFinished && (
@@ -274,7 +406,17 @@ export function RoomTournament({ state, me, onRefresh }: Props) {
             </p>
           )}
 
-          {/* Reinicio (Mundial terminado) */}
+          {isFinished && overview?.myEntryId && overview.tournamentId && (
+            <a
+              href={`/tournament/${overview.tournamentId}/room-card?entry=${overview.myEntryId}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block w-full rounded-xl border-2 border-ink bg-bone px-5 py-3 text-center font-mono text-xs uppercase tracking-[0.2em] text-ink shadow-hardsm transition hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none"
+            >
+              Ver mi card
+            </a>
+          )}
+
           {isFinished && isHost && (
             <button
               onClick={restart}
@@ -300,5 +442,118 @@ export function RoomTournament({ state, me, onRefresh }: Props) {
         </div>
       </div>
     </main>
+  )
+}
+
+// Componente que muestra el detalle de la tanda de penales
+type PenaltyDetailProps = {
+  homeName: string
+  awayName: string
+  homePenalties: number
+  awayPenalties: number
+  homeWon: boolean
+  events: Array<{ minute: number; type: string; side: string; playerName: string | null }>
+}
+
+function PenaltyDetail({
+  homeName,
+  awayName,
+  homePenalties,
+  awayPenalties,
+  homeWon,
+  events,
+}: PenaltyDetailProps) {
+  // Extraer los tiros de penal de los eventos (solo PENALTY_GOAL; MISS no se simula como evento)
+  const homeGoalEvents = events.filter((e) => e.type === 'PENALTY_GOAL' && e.side === 'HOME')
+  const awayGoalEvents = events.filter((e) => e.type === 'PENALTY_GOAL' && e.side === 'AWAY')
+
+  const total = Math.max(homePenalties, awayPenalties, 5)
+
+  return (
+    <div className="mt-2 rounded-lg border border-ink/10 bg-paper/60 px-3 py-2">
+      <p className="mb-1.5 text-center font-mono text-[9px] uppercase tracking-[0.2em] text-ink2/60">
+        Tanda de penales
+      </p>
+      <div className="flex items-center gap-3">
+        {/* Local */}
+        <div className="flex flex-1 flex-col items-start gap-1">
+          <span className={`truncate font-mono text-[10px] uppercase tracking-wide ${homeWon ? 'text-grass font-bold' : 'text-ink2/50'}`}>
+            {homeName}
+          </span>
+          <div className="flex gap-1">
+            {Array.from({ length: total }).map((_, i) => {
+              const scored = i < homePenalties
+              return (
+                <span
+                  key={i}
+                  className={`h-3 w-3 rounded-full border ${
+                    scored
+                      ? homeWon
+                        ? 'border-grass bg-grass'
+                        : 'border-ink2/50 bg-ink2/30'
+                      : 'border-vermillion/60 bg-vermillion/15'
+                  }`}
+                />
+              )
+            })}
+          </div>
+        </div>
+
+        {/* Marcador de penales */}
+        <div className="shrink-0 text-center">
+          <span className={`font-slab text-xl ${homeWon ? 'text-grass' : 'text-vermillion'}`}>
+            {homePenalties}
+          </span>
+          <span className="font-slab text-ink2/50"> – </span>
+          <span className={`font-slab text-xl ${!homeWon ? 'text-grass' : 'text-vermillion'}`}>
+            {awayPenalties}
+          </span>
+        </div>
+
+        {/* Visitante */}
+        <div className="flex flex-1 flex-col items-end gap-1">
+          <span className={`truncate font-mono text-[10px] uppercase tracking-wide ${!homeWon ? 'text-grass font-bold' : 'text-ink2/50'}`}>
+            {awayName}
+          </span>
+          <div className="flex gap-1">
+            {Array.from({ length: total }).map((_, i) => {
+              const scored = i < awayPenalties
+              return (
+                <span
+                  key={i}
+                  className={`h-3 w-3 rounded-full border ${
+                    scored
+                      ? !homeWon
+                        ? 'border-grass bg-grass'
+                        : 'border-ink2/50 bg-ink2/30'
+                      : 'border-vermillion/60 bg-vermillion/15'
+                  }`}
+                />
+              )
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Goleadores de penales si hay eventos */}
+      {(homeGoalEvents.length > 0 || awayGoalEvents.length > 0) && (
+        <div className="mt-2 grid grid-cols-2 gap-2 border-t border-ink/10 pt-2">
+          <div className="space-y-0.5">
+            {homeGoalEvents.map((e, i) => (
+              <p key={i} className="font-mono text-[9px] text-ink2/60">
+                {e.playerName ?? '—'}
+              </p>
+            ))}
+          </div>
+          <div className="space-y-0.5 text-right">
+            {awayGoalEvents.map((e, i) => (
+              <p key={i} className="font-mono text-[9px] text-ink2/60">
+                {e.playerName ?? '—'}
+              </p>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
   )
 }

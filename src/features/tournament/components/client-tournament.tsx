@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 import type { TournamentOverview } from '@/lib/tournaments/overview'
+import { GoldenConfetti } from '@/components/golden-confetti'
 
 const KO_ORDER: Record<string, number> = {
   GROUP: 0,
@@ -368,10 +369,12 @@ export function ClientTournament({ tournament }: { tournament: TournamentOvervie
 
   // -------- Reproducción de la campaña --------
   const allRevealed = revealed >= humanMatches.length
+  const isChampion = tournament.championEntryId === humanId
   const visible = humanMatches.slice(0, revealed)
 
   return (
     <div className="space-y-6">
+      {allRevealed && isChampion && <GoldenConfetti />}
       <div className="flex items-center justify-end gap-2">
         <button
           onClick={() => setRevealed((r) => Math.min(r + 1, humanMatches.length))}

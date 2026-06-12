@@ -15,14 +15,26 @@ import {
 } from '@/lib/db/schema'
 import type { BracketMatchInfo, GroupStandingInfo, MatchInfo, TournamentOverview } from './overview'
 
-// Índices de fase → rondas KO que se revelan en cada nivel.
-// -1: nada | 0: grupos | 1: R32 | 2: R16 | 3: QF | 4: SF | 5: Final
-const KO_ROUND_INDEX: Record<string, number> = {
+// Índices de fase (pares = resultados, impares = preview de cruces):
+// -1: nada | 0: grupos
+// 1: cruces R32 (preview) | 2: resultados R32
+// 3: cruces R16 (preview) | 4: resultados R16
+// 5: cruces QF  (preview) | 6: resultados QF
+// 7: cruces SF  (preview) | 8: resultados SF
+// 9: cruce Final (preview) | 10: resultado Final → FINISHED
+const KO_ROUND_PREVIEW_INDEX: Record<string, number> = {
   ROUND_OF_32: 1,
-  ROUND_OF_16: 2,
-  QUARTER_FINAL: 3,
-  SEMI_FINAL: 4,
-  FINAL: 5,
+  ROUND_OF_16: 3,
+  QUARTER_FINAL: 5,
+  SEMI_FINAL: 7,
+  FINAL: 9,
+}
+const KO_ROUND_RESULT_INDEX: Record<string, number> = {
+  ROUND_OF_32: 2,
+  ROUND_OF_16: 4,
+  QUARTER_FINAL: 6,
+  SEMI_FINAL: 8,
+  FINAL: 10,
 }
 const KO_ROUNDS = ['ROUND_OF_32', 'ROUND_OF_16', 'QUARTER_FINAL', 'SEMI_FINAL', 'FINAL'] as const
 
@@ -36,7 +48,10 @@ export type HumanRunEntry = {
   eliminatedByHuman: boolean
 }
 
-export type RoomBracketMatchInfo = BracketMatchInfo & { isHumanDerby: boolean }
+export type RoomBracketMatchInfo = BracketMatchInfo & {
+  isHumanDerby: boolean
+  showScores: boolean
+}
 
 export type RoomTournamentOverview = Omit<TournamentOverview, 'knockoutMatches'> & {
   myEntryId: string | null
@@ -96,7 +111,7 @@ export async function getRoomTournamentOverview(
 
   const visibleMatches = allDbMatches.filter((m) => {
     if (m.round === 'GROUP') return revealStageIndex >= 0
-    return (KO_ROUND_INDEX[m.round] ?? 99) <= revealStageIndex
+    return (KO_ROUND_PREVIEW_INDEX[m.round] ?? 99) <= revealStageIndex
   })
 
   const visibleMatchIds = visibleMatches.map((m) => m.id)
@@ -214,15 +229,17 @@ export async function getRoomTournamentOverview(
       })
     : []
 
-  // Bracket KO (clampado).
+  // Bracket KO (clampado por preview).
   const knockoutMatches: RoomBracketMatchInfo[] = []
 
   for (const round of KO_ROUNDS) {
-    if ((KO_ROUND_INDEX[round] ?? 99) > revealStageIndex) continue
+    if ((KO_ROUND_PREVIEW_INDEX[round] ?? 99) > revealStageIndex) continue
 
     const roundMatches = visibleMatches
       .filter((m) => m.round === round)
       .sort((a, b) => a.stageOrder - b.stageOrder)
+
+    const showScores = (KO_ROUND_RESULT_INDEX[round] ?? 99) <= revealStageIndex
 
     for (const m of roundMatches) {
       const isHumanDerby = humanEntryIds.has(m.homeEntryId) && humanEntryIds.has(m.awayEntryId)
@@ -240,13 +257,16 @@ export async function getRoomTournamentOverview(
         wentToPenalties: m.wentToPenalties,
         winnerId: m.winnerEntryId,
         order: m.stageOrder,
-        events: (eventsByMatch.get(m.id) ?? []).map((ev) => ({
-          minute: ev.minute,
-          type: ev.eventType,
-          side: ev.side,
-          playerName: ev.playerName,
-        })),
+        events: showScores
+          ? (eventsByMatch.get(m.id) ?? []).map((ev) => ({
+              minute: ev.minute,
+              type: ev.eventType,
+              side: ev.side,
+              playerName: ev.playerName,
+            }))
+          : [],
         isHumanDerby,
+        showScores,
       })
     }
   }
@@ -278,25 +298,24 @@ export async function getRoomTournamentOverview(
 
     if (revealStageIndex >= 0 && isSimulated) {
       const isChampion = tournament.championEntryId === entry.id
-      if (isChampion && revealStageIndex >= 5) {
+      // El campeón solo se revela cuando el resultado de la final está visible (idx=10).
+      if (isChampion && revealStageIndex >= 10) {
         status = 'CHAMPION'
         reachedRound = 'FINAL'
       } else {
-        // Buscar en qué ronda fue eliminado.
-        const koMatchesRevealed = knockoutMatches
+        // Solo considerar partidos cuyo resultado ya fue revelado.
+        const koMatchesWithResults = knockoutMatches.filter((m) => m.showScores)
 
-        // ¿Llegó a la fase revelada actual? Si no aparece en ningún KO, fue eliminado en grupos.
-        const appeared = koMatchesRevealed.some(
+        const appeared = koMatchesWithResults.some(
           (m) => m.homeEntryId === entry.id || m.awayEntryId === entry.id,
         )
 
-        if (!appeared && revealStageIndex >= 1) {
-          // No clasificó de grupos.
+        // R32 resultados visibles recién en idx=2.
+        if (!appeared && revealStageIndex >= 2) {
           status = 'ELIMINATED'
           reachedRound = 'GROUP'
         } else {
-          // Buscar el partido donde fue eliminado (perdió).
-          for (const m of koMatchesRevealed) {
+          for (const m of koMatchesWithResults) {
             if (m.winnerId && m.winnerId !== entry.id) {
               if (m.homeEntryId === entry.id || m.awayEntryId === entry.id) {
                 status = 'ELIMINATED'
@@ -330,7 +349,7 @@ export async function getRoomTournamentOverview(
     }
   })
 
-  const championEntryId = revealStageIndex >= 5 ? (tournament.championEntryId ?? null) : null
+  const championEntryId = revealStageIndex >= 10 ? (tournament.championEntryId ?? null) : null
   const championName = championEntryId ? entryMap[championEntryId]?.displayName ?? null : null
   const isFinished = tournament.status === 'FINISHED'
 

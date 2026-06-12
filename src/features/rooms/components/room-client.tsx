@@ -37,10 +37,12 @@ export function RoomClient({ code }: { code: string }) {
       setError(null)
 
       const status = body.state.status
-      if (status === 'FINISHED' || status === 'CANCELLED') return
+      if (status === 'CANCELLED') return
 
       const interval =
-        status === 'TOURNAMENT' ? POLL_INTERVAL_TOURNAMENT : POLL_INTERVAL_LOBBY_DRAFT
+        status === 'TOURNAMENT' || status === 'FINISHED'
+          ? POLL_INTERVAL_TOURNAMENT
+          : POLL_INTERVAL_LOBBY_DRAFT
       pollRef.current = setTimeout(poll, interval)
     } catch {
       setError('Sin conexión. Reintentando…')
