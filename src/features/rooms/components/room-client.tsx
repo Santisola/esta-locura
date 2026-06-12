@@ -33,6 +33,16 @@ export function RoomClient({ code }: { code: string }) {
         return
       }
       const body: PolledState = await res.json()
+
+      // Tiene sesión válida pero no es participante de esta sala (ej: abrió el link
+      // de invitación con un session token previo de haber usado el sitio antes).
+      // El endpoint responde 200 con me=null, así que sin esto caería al lobby sin
+      // figurar entre los jugadores. Lo mandamos al form de apodo para que se una.
+      if (body.me === null) {
+        window.location.href = `/sala/${code}/join`
+        return
+      }
+
       setData(body)
       setError(null)
 
