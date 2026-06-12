@@ -75,6 +75,7 @@ export function RoomTournament({ state, me, onRefresh }: Props) {
   const [overview, setOverview] = useState<RoomTournamentOverview | null>(null)
   const [ovLoading, setOvLoading] = useState(false)
   const [advancing, setAdvancing] = useState(false)
+  const [revealingAll, setRevealingAll] = useState(false)
   const [restarting, setRestarting] = useState(false)
   const [ovError, setOvError] = useState<string | null>(null)
 
@@ -129,6 +130,24 @@ export function RoomTournament({ state, me, onRefresh }: Props) {
       if (!res.ok) { setOvError(d.error ?? 'Error.'); return }
     } finally {
       setAdvancing(false)
+      onRefresh()
+    }
+  }
+
+  // Revela todo el Mundial de una: salta directo al resultado de la Final.
+  async function revealAll() {
+    setRevealingAll(true)
+    setOvError(null)
+    try {
+      const res = await fetch(`/api/rooms/${state.code}/advance`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ all: true }),
+      })
+      const d = await res.json()
+      if (!res.ok) { setOvError(d.error ?? 'Error.'); return }
+    } finally {
+      setRevealingAll(false)
       onRefresh()
     }
   }
@@ -392,13 +411,22 @@ export function RoomTournament({ state, me, onRefresh }: Props) {
         {/* Controles */}
         <div className="mt-6 space-y-3 border-t-2 border-ink/15 pt-5">
           {isHost && !isFinished && (
-            <button
-              onClick={advance}
-              disabled={advancing || ovLoading}
-              className="w-full rounded-xl border-2 border-ink bg-gradient-to-r from-celeste to-violeta px-5 py-4 font-slab text-lg uppercase tracking-wide text-white shadow-hardsm transition hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              {advancing ? 'Avanzando…' : nextStageLabel(revealIdx)}
-            </button>
+            <>
+              <button
+                onClick={advance}
+                disabled={advancing || revealingAll || ovLoading}
+                className="w-full rounded-xl border-2 border-ink bg-gradient-to-r from-celeste to-violeta px-5 py-4 font-slab text-lg uppercase tracking-wide text-white shadow-hardsm transition hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                {advancing ? 'Avanzando…' : nextStageLabel(revealIdx)}
+              </button>
+              <button
+                onClick={revealAll}
+                disabled={advancing || revealingAll || ovLoading}
+                className="w-full rounded-xl border-2 border-ink bg-bone px-5 py-3 font-mono text-xs uppercase tracking-[0.2em] text-ink shadow-hardsm transition hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                {revealingAll ? 'Revelando…' : '⏭ Simular todo el Mundial'}
+              </button>
+            </>
           )}
           {!isHost && !isFinished && (
             <p className="text-center font-mono text-[11px] uppercase tracking-[0.14em] text-ink2">

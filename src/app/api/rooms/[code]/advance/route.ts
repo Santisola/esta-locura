@@ -17,13 +17,16 @@ const MAX_STAGE_INDEX = 10
 
 // POST /api/rooms/[code]/advance — solo host.
 // Incrementa revealStageIndex en 1. Si llega a MAX_STAGE_INDEX → sala FINISHED.
+// Con body { all: true } salta directo al final y revela todo el Mundial de una.
 // Idempotente: no avanza si ya está en el índice máximo.
 export async function POST(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ code: string }> },
 ) {
   try {
     const { code } = await params
+    const body = await request.json().catch(() => ({})) as { all?: boolean }
+    const revealAll = body.all === true
     const sessionToken = await getSessionTokenReadOnly()
     if (!sessionToken) return NextResponse.json({ error: 'Sin sesión.' }, { status: 401 })
 
@@ -41,7 +44,7 @@ export async function POST(
       return NextResponse.json({ revealStageIndex: currentIndex, finished: true })
     }
 
-    const nextIndex = currentIndex + 1
+    const nextIndex = revealAll ? MAX_STAGE_INDEX : currentIndex + 1
     const isFinished = nextIndex >= MAX_STAGE_INDEX
 
     await db
