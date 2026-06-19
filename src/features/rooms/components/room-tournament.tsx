@@ -542,8 +542,8 @@ export function RoomTournament({ state, me, onRefresh }: Props) {
         </div>
       )}
 
-      {/* Confetti si el jugador actual ganó el torneo */}
-      {isFinished && overview?.championEntryId && overview.championEntryId === overview.myEntryId && (
+      {/* Confetti dorado al revelarse el campeón (para todos los participantes) */}
+      {isFinished && overview?.championName && (
         <GoldenConfetti />
       )}
     </main>
