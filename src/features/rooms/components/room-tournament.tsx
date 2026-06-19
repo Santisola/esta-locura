@@ -73,6 +73,16 @@ const ROUND_ORDER: Record<string, number> = {
   FINAL: 5,
 }
 
+type MyLastResult = {
+  roundLabel: string
+  myScore: number
+  oppScore: number
+  oppName: string
+  won: boolean
+  draw: boolean
+  penalties: { mine: number; theirs: number } | null
+}
+
 // Nombre de la ronda "actual" del Mundial según el índice revelado.
 function currentRoundName(idx: number): string {
   if (idx <= 0) return 'fase de grupos'
@@ -245,6 +255,52 @@ export function RoomTournament({ state, me, onRefresh }: Props) {
     return overview.groups.filter((g) => g.entries.some((e) => e.type === 'HUMAN_DRAFTED'))
   }, [overview, onlyHumanGroups])
 
+  // Resultado del último partido jugado del usuario (KO con resultado revelado o,
+  // en su defecto, el último de fase de grupos). Visto desde su perspectiva.
+  const myLastResult = useMemo<MyLastResult | null>(() => {
+    if (!overview?.myEntryId) return null
+    const id = overview.myEntryId
+    type Cand = {
+      recency: number; isHome: boolean; homeScore: number; awayScore: number
+      homeName: string; awayName: string; wentToPenalties: boolean
+      homePenalties: number | null; awayPenalties: number | null; winnerId: string | null; roundLabel: string
+    }
+    const cands: Cand[] = []
+    for (const m of overview.knockoutMatches) {
+      if (!m.showScores) continue
+      if (m.homeEntryId !== id && m.awayEntryId !== id) continue
+      cands.push({
+        recency: 100 + (ROUND_ORDER[m.round] ?? 0), isHome: m.homeEntryId === id,
+        homeScore: m.homeScore, awayScore: m.awayScore, homeName: m.homeName, awayName: m.awayName,
+        wentToPenalties: m.wentToPenalties, homePenalties: m.homePenalties, awayPenalties: m.awayPenalties,
+        winnerId: m.winnerId, roundLabel: KO_ROUND_LABEL[m.round] ?? 'Eliminatorias',
+      })
+    }
+    for (const g of overview.groups) {
+      for (const f of g.fixtures) {
+        if (f.status !== 'FINISHED') continue
+        if (f.homeEntryId !== id && f.awayEntryId !== id) continue
+        cands.push({
+          recency: f.stageOrder ?? 0, isHome: f.homeEntryId === id,
+          homeScore: f.homeScore, awayScore: f.awayScore, homeName: f.homeName, awayName: f.awayName,
+          wentToPenalties: f.wentToPenalties, homePenalties: f.homePenalties, awayPenalties: f.awayPenalties,
+          winnerId: f.winnerEntryId, roundLabel: 'Grupos',
+        })
+      }
+    }
+    if (cands.length === 0) return null
+    const m = [...cands].sort((a, b) => a.recency - b.recency).pop()!
+    const myScore = m.isHome ? m.homeScore : m.awayScore
+    const oppScore = m.isHome ? m.awayScore : m.homeScore
+    const oppName = m.isHome ? m.awayName : m.homeName
+    const won = m.winnerId ? m.winnerId === id : myScore > oppScore
+    const draw = !m.wentToPenalties && !m.winnerId && myScore === oppScore
+    const penalties = m.wentToPenalties
+      ? { mine: (m.isHome ? m.homePenalties : m.awayPenalties) ?? 0, theirs: (m.isHome ? m.awayPenalties : m.homePenalties) ?? 0 }
+      : null
+    return { roundLabel: m.roundLabel, myScore, oppScore, oppName, won, draw, penalties }
+  }, [overview])
+
   return (
     <main className="min-h-screen bg-paper text-ink">
       {/* ===== Header sticky: identidad de fase + stepper (resumen siempre visible) ===== */}
@@ -300,7 +356,7 @@ export function RoomTournament({ state, me, onRefresh }: Props) {
           <div className="lg:grid lg:grid-cols-[340px_minmax(0,1fr)] lg:gap-6">
             {/* ===== Rail izquierdo: situación + participantes + controles ===== */}
             <aside className="order-2 mt-6 space-y-4 lg:order-1 lg:mt-0 lg:sticky lg:top-[120px] lg:self-start">
-              <MySituationCard run={myRun} revealIdx={revealIdx} aliveCount={aliveCount} totalHumans={totalHumans} topScorer={overview?.topScorer ?? null} />
+              <MySituationCard run={myRun} revealIdx={revealIdx} aliveCount={aliveCount} totalHumans={totalHumans} topScorer={overview?.topScorer ?? null} lastResult={myLastResult} />
               {overview && overview.humans.length > 0 && (
                 <div className="rounded-2xl border-2 border-ink bg-bone p-4 shadow-hardsm">
                   <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-ink2">Participantes</p>
@@ -616,12 +672,14 @@ function MySituationCard({
   aliveCount,
   totalHumans,
   topScorer,
+  lastResult,
 }: {
   run: HumanRunEntry | null
   revealIdx: number
   aliveCount: number
   totalHumans: number
   topScorer: { name: string; goals: number } | null
+  lastResult: MyLastResult | null
 }) {
   return (
     <div className="rounded-2xl border-2 border-ink bg-bone p-4 shadow-hardsm">
@@ -645,6 +703,33 @@ function MySituationCard({
       ) : (
         <p className="mt-2 text-xs text-ink2">No estás participando con un equipo en este Mundial.</p>
       )}
+
+      {lastResult && (
+        <div className="mt-3 border-t-2 border-ink/10 pt-3">
+          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink2">
+            Tu último partido · {lastResult.roundLabel}
+          </p>
+          <div className="mt-1.5 flex items-baseline gap-2">
+            <span
+              className={`shrink-0 font-mono text-[10px] font-bold uppercase tracking-[0.06em] ${
+                lastResult.won ? 'text-grassdark' : lastResult.draw ? 'text-ink2' : 'text-vermillion'
+              }`}
+            >
+              {lastResult.won ? 'Ganó' : lastResult.draw ? 'Empató' : 'Perdió'}
+            </span>
+            <span className="font-slab text-lg leading-none text-ink">
+              {lastResult.myScore} – {lastResult.oppScore}
+              {lastResult.penalties && (
+                <span className="ml-1 font-mono text-[11px] font-semibold text-ink2">
+                  (pen. {lastResult.penalties.mine}–{lastResult.penalties.theirs})
+                </span>
+              )}
+            </span>
+            <span className="min-w-0 flex-1 truncate text-right text-xs text-ink2">vs {lastResult.oppName}</span>
+          </div>
+        </div>
+      )}
+
       <div className="mt-3 flex flex-wrap gap-2 border-t-2 border-ink/10 pt-3">
         <span className="rounded-full border border-line bg-paper2 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.1em] text-ink2">
           {aliveCount}/{totalHumans} en carrera
