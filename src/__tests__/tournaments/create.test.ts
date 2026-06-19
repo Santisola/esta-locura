@@ -160,11 +160,11 @@ describe('createTournament — con mock DB', () => {
     expect(mockDb.insert).toHaveBeenCalledTimes(3)
   })
 
-  it('lanza error si hay más de 12 humanos', async () => {
+  it('lanza error si hay más de 20 humanos', async () => {
     const mockDb = buildMockDbForCreate()
     vi.mocked(getDb).mockReturnValue(mockDb as unknown as ReturnType<typeof getDb>)
 
-    const humans = Array.from({ length: 13 }, (_, i) => ({
+    const humans = Array.from({ length: 21 }, (_, i) => ({
       draftedTeamId: `draft-${i}`,
       displayName: `Player ${i}`,
       ratings: { attack: 75, midfield: 75, defense: 75, goalkeeping: 75, ovr: 75 },

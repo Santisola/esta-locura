@@ -154,14 +154,16 @@ export async function loadDraftedTeamRatings(draftedTeamId: string) {
 // (48−N) selecciones reales. Los humanos reemplazan a las N selecciones de
 // PEOR media (ovr) — se mantienen siempre las más fuertes.
 //
-// Si separateHumans=true (modo multiplayer), garantiza máx. 1 humano por grupo
-// (nunca se cruzan en fase de grupos, solo en eliminatorias).
+// Si separateHumans=true (modo multiplayer), reparte los humanos lo más
+// separados posible entre los 12 grupos (round-robin). Con ≤12 humanos queda
+// uno por grupo; con más, algunos grupos comparten el mínimo necesario (con 20
+// humanos, máx. 2 por grupo).
 export async function createTournament(params: CreateTournamentParams) {
   const { type, roomId, humans, separateHumans, seedBase } = params
   const db = getDb()
 
-  if (humans.length > 12) {
-    throw new Error('El número máximo de jugadores humanos en un torneo es 12 (un por grupo).')
+  if (humans.length > 20) {
+    throw new Error('El número máximo de jugadores humanos en un torneo es 20.')
   }
   if (humans.length === 0) {
     throw new Error('Se necesita al menos un equipo humano.')
@@ -235,24 +237,28 @@ export async function createTournament(params: CreateTournamentParams) {
   let groupAssignments: Array<{ code: string; entryIds: string[] }>
 
   if (separateHumans && humans.length > 1) {
-    // Máx. 1 humano por grupo: elegir grupos distintos al azar para los humanos
-    // y repartir las reales en los cupos restantes (3 por grupo).
+    // Repartir los humanos en round-robin sobre los 12 grupos (mezclados), de
+    // modo que queden lo más separados posible: con ≤12 cae uno por grupo, con
+    // más se comparte el mínimo (máx. 2 por grupo con 20). Cada grupo se completa
+    // con reales hasta 4.
     const shuffledGroupCodes = shuffle([...GROUP_CODES], `groups:${seedBase}`)
-    const humanGroupCodes = shuffledGroupCodes.slice(0, humans.length)
-
-    // Distribuir reales: 3 por cada grupo con humano + 4 por cada grupo sin humano.
+    const shuffledHumanIds = shuffle([...humanIds], `humanqueue:${seedBase}`)
     const realQueue = shuffle([...realIds], `realqueue:${seedBase}`)
-    let realIdx = 0
 
-    groupAssignments = GROUP_CODES.map((code) => {
-      const hasHuman = humanGroupCodes.includes(code)
-      const humanId = hasHuman ? humanIds[humanGroupCodes.indexOf(code)] : null
-      const realsNeeded = hasHuman ? 3 : 4
+    const humansByGroup: string[][] = GROUP_CODES.map(() => [])
+    shuffledHumanIds.forEach((id, i) => {
+      humansByGroup[i % GROUP_CODES.length].push(id)
+    })
+
+    let realIdx = 0
+    groupAssignments = shuffledGroupCodes.map((code, idx) => {
+      const groupHumans = humansByGroup[idx]
+      const realsNeeded = 4 - groupHumans.length
       const sliceIds = realQueue.slice(realIdx, realIdx + realsNeeded)
       realIdx += realsNeeded
       return {
         code,
-        entryIds: humanId ? [humanId, ...sliceIds] : sliceIds,
+        entryIds: [...groupHumans, ...sliceIds],
       }
     })
   } else {

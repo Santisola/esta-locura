@@ -12,7 +12,7 @@ const createRoomSchema = z.object({
   nickname: z.string().min(1).max(32).trim(),
   difficultyMode: z.enum(['CLASSIC', 'MEMORY']),
   rerollsPerPlayer: z.number().int().min(0).max(10).default(3),
-  maxHumanPlayers: z.number().int().min(2).max(12).default(8),
+  maxHumanPlayers: z.number().int().min(2).max(20).default(8),
   separateHumans: z.boolean().default(true),
 })
 

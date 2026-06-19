@@ -9,6 +9,7 @@ export default function MultiplayerPage() {
   const [nickname, setNickname] = useState('')
   const [joinCode, setJoinCode] = useState('')
   const [mode, setMode] = useState<'CLASSIC' | 'MEMORY'>('CLASSIC')
+  const [maxHumanPlayers, setMaxHumanPlayers] = useState(8)
   const [separateHumans, setSeparateHumans] = useState(true)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -24,7 +25,7 @@ export default function MultiplayerPage() {
       const res = await fetch('/api/rooms', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nickname: nickname.trim(), difficultyMode: mode, separateHumans }),
+        body: JSON.stringify({ nickname: nickname.trim(), difficultyMode: mode, maxHumanPlayers, separateHumans }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Error al crear la sala.')
@@ -119,6 +120,27 @@ export default function MultiplayerPage() {
                 </button>
               )
             })}
+          </div>
+
+          {/* Cantidad máxima de jugadores */}
+          <div className="space-y-2">
+            <div className="flex items-baseline justify-between">
+              <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-ink2">Jugadores máx.</p>
+              <p className="font-slab text-lg leading-none text-ink">{maxHumanPlayers}</p>
+            </div>
+            <input
+              type="range"
+              min={2}
+              max={20}
+              step={1}
+              value={maxHumanPlayers}
+              onChange={(e) => setMaxHumanPlayers(Number(e.target.value))}
+              className="w-full accent-violeta"
+            />
+            <div className="flex justify-between font-mono text-[10px] text-ink2/50">
+              <span>2</span>
+              <span>20</span>
+            </div>
           </div>
 
           {/* Separación de humanos */}
