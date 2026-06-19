@@ -706,27 +706,31 @@ function MySituationCard({
 
       {lastResult && (
         <div className="mt-3 border-t-2 border-ink/10 pt-3">
-          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink2">
-            Tu último partido · {lastResult.roundLabel}
-          </p>
-          <div className="mt-1.5 flex items-baseline gap-2">
+          <div className="flex items-center justify-between gap-2">
+            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink2">Tu último partido</p>
             <span
-              className={`shrink-0 font-mono text-[10px] font-bold uppercase tracking-[0.06em] ${
+              className={`shrink-0 font-mono text-[9px] font-bold uppercase tracking-[0.1em] ${
                 lastResult.won ? 'text-grassdark' : lastResult.draw ? 'text-ink2' : 'text-vermillion'
               }`}
             >
               {lastResult.won ? 'Ganó' : lastResult.draw ? 'Empató' : 'Perdió'}
             </span>
-            <span className="font-slab text-lg leading-none text-ink">
-              {lastResult.myScore} – {lastResult.oppScore}
-              {lastResult.penalties && (
-                <span className="ml-1 font-mono text-[11px] font-semibold text-ink2">
-                  (pen. {lastResult.penalties.mine}–{lastResult.penalties.theirs})
-                </span>
-              )}
-            </span>
-            <span className="min-w-0 flex-1 truncate text-right text-xs text-ink2">vs {lastResult.oppName}</span>
           </div>
+          <div className="mt-1.5 flex items-center gap-2 rounded-lg border-2 border-line bg-paper2 px-3 py-2">
+            <span className="min-w-0 flex-1 truncate text-right text-xs font-bold text-violeta">
+              {run?.nickname ?? 'Tu equipo'}
+            </span>
+            <div className="shrink-0 text-center leading-none">
+              <span className="font-slab text-lg text-ink">{lastResult.myScore} – {lastResult.oppScore}</span>
+              {lastResult.penalties && (
+                <div className="mt-0.5 font-mono text-[9px] font-semibold uppercase tracking-wide text-ink2">
+                  pen. {lastResult.penalties.mine}–{lastResult.penalties.theirs}
+                </div>
+              )}
+            </div>
+            <span className="min-w-0 flex-1 truncate text-xs text-ink">{lastResult.oppName}</span>
+          </div>
+          <p className="mt-1 text-center font-mono text-[9px] uppercase tracking-[0.14em] text-ink2/50">{lastResult.roundLabel}</p>
         </div>
       )}
 
