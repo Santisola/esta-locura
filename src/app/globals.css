@@ -52,7 +52,7 @@ a {
 }
 
 /* Respeta a quien prefiere menos movimiento: desactiva las animaciones. */
-@media (prefers-reduced-motion: reduce) {
+/* @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
@@ -60,4 +60,4 @@ a {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-}
+} */

@@ -60,6 +60,11 @@ const config: Config = {
           '55%': { transform: 'scale(1.25)' },
           '100%': { transform: 'scale(1)', opacity: '1' },
         },
+        flashPulse: {
+          '0%, 100%': { transform: 'scale(1)', boxShadow: '0 0 0 0 rgba(109, 79, 230, 0)' },
+          '25%': { transform: 'scale(1.025)', boxShadow: '0 0 0 7px rgba(109, 79, 230, 0.38)' },
+          '50%': { transform: 'scale(1)', boxShadow: '0 0 0 3px rgba(109, 79, 230, 0.22)' },
+        },
       },
       animation: {
         rowIn: 'rowIn 0.45s cubic-bezier(0.2,0.8,0.2,1) both',
@@ -67,6 +72,7 @@ const config: Config = {
         slideIn: 'slideIn 0.35s ease-out both',
         pop: 'pop 0.42s cubic-bezier(0.2,0.9,0.3,1.3) both',
         popScore: 'popScore 0.5s cubic-bezier(0.2,0.9,0.3,1.3) both',
+        flashPulse: 'flashPulse 0.65s ease-in-out 2',
       },
       backgroundImage: {
         pitch: 'radial-gradient(circle at top, rgba(125, 211, 252, 0.12), transparent 42%), linear-gradient(135deg, rgba(239, 125, 87, 0.16), transparent 45%)',
